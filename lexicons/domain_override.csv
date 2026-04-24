@@ -1,0 +1,85 @@
+phrase,polarity,lang
+default rate rises,negative,en
+default rate rising,negative,en
+default rate increasing,negative,en
+default rate surges,negative,en
+default rate jumps,negative,en
+default rate climbs,negative,en
+default rate declines,positive,en
+default rate falls,positive,en
+default rate drops,positive,en
+defaults rise,negative,en
+defaults increase,negative,en
+defaults surge,negative,en
+defaults fall,positive,en
+defaults decline,positive,en
+non-accrual increases,negative,en
+non-accrual rising,negative,en
+non-accruals increase,negative,en
+non-accruals rise,negative,en
+non-accruals surge,negative,en
+non-accruals fall,positive,en
+non-accruals decline,positive,en
+nonaccrual increases,negative,en
+nonaccrual rises,negative,en
+spread widens,negative,en
+spread widening,negative,en
+spread tightens,positive,en
+spread tightening,positive,en
+spreads widen,negative,en
+spreads widening,negative,en
+spreads tighten,positive,en
+spreads tightening,positive,en
+credit quality deteriorates,negative,en
+credit quality improves,positive,en
+recovery rate improves,positive,en
+recovery rate declines,negative,en
+recovery rate falls,negative,en
+dividend cut,negative,en
+dividend reduction,negative,en
+dividend suspension,negative,en
+dividend increase,positive,en
+dividend raised,positive,en
+dividend hike,positive,en
+NAV discount widens,negative,en
+NAV discount narrows,positive,en
+NAV premium,positive,en
+AUM grows,positive,en
+AUM growth,positive,en
+AUM expands,positive,en
+AUM declines,negative,en
+new commitments,positive,en
+deployment pace,positive,en
+fundraising strong,positive,en
+fundraising weak,negative,en
+covenant-lite rises,negative,en
+covenant lite increase,negative,en
+interest coverage deteriorates,negative,en
+interest coverage improves,positive,en
+デフォルト率の上昇,negative,ja
+デフォルト率上昇,negative,ja
+デフォルト率の低下,positive,ja
+デフォルト率低下,positive,ja
+スプレッドの拡大,negative,ja
+スプレッド拡大,negative,ja
+スプレッドの縮小,positive,ja
+スプレッド縮小,positive,ja
+貸倒引当金の増加,negative,ja
+貸倒引当増加,negative,ja
+貸倒引当金の減少,positive,ja
+ノンアクルーアル増加,negative,ja
+ノンアクルーアル増,negative,ja
+ノンアクルーアル減少,positive,ja
+配当の増額,positive,ja
+増配,positive,ja
+減配,negative,ja
+配当維持,positive,ja
+配当停止,negative,ja
+NAVディスカウント拡大,negative,ja
+NAVディスカウント縮小,positive,ja
+運用資産の増加,positive,ja
+運用資産増加,positive,ja
+新規組成,positive,ja
+組成拡大,positive,ja
+規制強化,negative,ja
+規制緩和,positive,ja

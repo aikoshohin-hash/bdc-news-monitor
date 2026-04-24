@@ -1,0 +1,56 @@
+# Tickers for yfinance price collection.
+# Initial universe = BIZD top 12 holdings (as of 2026-04, subject to rebalance)
+# plus benchmarks. Review after BIZD quarterly rebalance.
+
+start_date: "2024-01-01"
+
+active_tickers:
+  # BDCs (12)
+  - symbol: ARCC
+    name: "Ares Capital"
+    group: bdc
+  - symbol: FSK
+    name: "FS KKR Capital"
+    group: bdc
+  - symbol: BXSL
+    name: "Blackstone Secured Lending"
+    group: bdc
+  - symbol: OBDC
+    name: "Blue Owl Capital Corp"
+    group: bdc
+  - symbol: MAIN
+    name: "Main Street Capital"
+    group: bdc
+  - symbol: HTGC
+    name: "Hercules Capital"
+    group: bdc
+  - symbol: GBDC
+    name: "Golub Capital BDC"
+    group: bdc
+  - symbol: BBDC
+    name: "Barings BDC"
+    group: bdc
+  - symbol: PSEC
+    name: "Prospect Capital"
+    group: bdc
+  - symbol: TSLX
+    name: "Sixth Street Specialty Lending"
+    group: bdc
+  - symbol: NMFC
+    name: "New Mountain Finance"
+    group: bdc
+  - symbol: CGBD
+    name: "Carlyle Secured Lending"
+    group: bdc
+  # Benchmarks
+  - symbol: BIZD
+    name: "VanEck BDC Income ETF"
+    group: benchmark
+  - symbol: ^GSPC
+    name: "S&P 500"
+    group: benchmark
+  - symbol: HYG
+    name: "iShares iBoxx HY Corp Bond ETF"
+    group: benchmark
+
+legacy_tickers: []

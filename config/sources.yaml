@@ -1,0 +1,76 @@
+# News sources.
+# Types: google_news | rss | gdelt | sec_edgar
+
+google_news:
+  # Google News RSS search — multiple queries to broaden coverage.
+  # hl=language, gl=country, ceid=country:language
+  queries_en:
+    - q: "\"private credit\" OR \"direct lending\" OR \"private debt\""
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    - q: "\"business development company\" OR BDC"
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    - q: "(ARCC OR BXSL OR OBDC OR FSK OR MAIN) earnings"
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    - q: "\"non-accrual\" OR \"covenant-lite\" OR \"leveraged loan\""
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+  queries_ja:
+    - q: "プライベートクレジット OR ダイレクトレンディング"
+      hl: "ja"
+      gl: "JP"
+      ceid: "JP:ja"
+    - q: "プライベートデット OR 直接融資"
+      hl: "ja"
+      gl: "JP"
+      ceid: "JP:ja"
+    - q: "BDC 投資"
+      hl: "ja"
+      gl: "JP"
+      ceid: "JP:ja"
+
+rss:
+  # Direct RSS feeds (public, free)
+  - id: seeking_alpha_bdcs
+    name: "Seeking Alpha — BDCs"
+    url: "https://seekingalpha.com/sector/financial/bdcs.xml"
+    language: en
+    weight: 0.5
+  - id: reuters_markets
+    name: "Reuters — Markets"
+    url: "https://www.reutersagency.com/feed/?best-sectors=business-finance&post_type=best"
+    language: en
+    weight: 0.9
+  # Placeholder / often rate-limited — user may add/remove as needed
+  - id: pdi_news
+    name: "Private Debt Investor"
+    url: "https://www.privatedebtinvestor.com/feed/"
+    language: en
+    weight: 1.0
+
+gdelt:
+  # GDELT DOC 2.0 Article Search API (free, no key)
+  # Each query is translated to theme + keyword
+  enabled: true
+  queries:
+    - "\"private credit\""
+    - "\"direct lending\""
+    - "\"business development company\""
+  maxrecords: 100
+  timespan: "24h"   # only used on incremental pulls; full backfill uses date range
+
+sec_edgar:
+  # SEC EDGAR Full-Text Search API — filters for BDC 1940 Act filings
+  enabled: true
+  forms:
+    - "N-2"
+    - "10-K"
+    - "10-Q"
+    - "8-K"
+  ciks: []  # populate with CIKs of target BDCs over time

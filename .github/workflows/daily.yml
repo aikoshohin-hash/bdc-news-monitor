@@ -1,0 +1,68 @@
+name: daily-update
+
+on:
+  schedule:
+    - cron: "0 22 * * *"  # 22:00 UTC = 07:00 JST
+  workflow_dispatch: {}
+
+permissions:
+  contents: write  # needed to commit updated docs/data/*.json
+
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Restore working DB
+        uses: actions/cache@v4
+        with:
+          path: data/bdc_news.sqlite
+          key: bdc-news-db-${{ github.run_id }}
+          restore-keys: |
+            bdc-news-db-
+
+      - name: Collect
+        run: bdc-news collect || true
+
+      - name: Classify
+        run: bdc-news classify
+
+      - name: Score (offline)
+        run: bdc-news score
+
+      - name: Prices
+        run: bdc-news prices || true
+
+      - name: Export
+        run: bdc-news export
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "chore(data): daily refresh $(date -u +%F)"
+            git push
+          fi

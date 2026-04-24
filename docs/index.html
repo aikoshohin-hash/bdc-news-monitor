@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>BDC / Private Credit News Monitor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<header class="topbar">
+  <h1>BDC / Private Credit News Monitor</h1>
+  <div class="meta">
+    <span id="updated">更新日時: —</span>
+    <span id="article-count">記事数: —</span>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="entities">By Entity</button>
+    <button class="tab" data-tab="articles">Articles</button>
+    <button class="tab" data-tab="about">About</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ---------- Overview tab ---------- -->
+  <section id="tab-overview" class="tab-panel active">
+    <div class="controls">
+      <label>期間
+        <select id="range-select">
+          <option value="1M">1M</option>
+          <option value="3M">3M</option>
+          <option value="6M">6M</option>
+          <option value="1Y">1Y</option>
+          <option value="ALL" selected>ALL</option>
+        </select>
+      </label>
+      <label>地域
+        <select id="region-select">
+          <option value="all" selected>All</option>
+          <option value="global">Global</option>
+          <option value="jp">JP</option>
+        </select>
+      </label>
+      <label>粒度
+        <select id="freq-select">
+          <option value="D">日次</option>
+          <option value="W" selected>週次</option>
+          <option value="M">月次</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="grid">
+      <div class="card"><h3>件数推移</h3><div id="chart-counts" class="chart"></div></div>
+      <div class="card"><h3>センチメント指数</h3><div id="chart-sentiment" class="chart"></div></div>
+      <div class="card wide"><h3>ポジ／ネガ比率</h3><div id="chart-posneg" class="chart"></div></div>
+      <div class="card wide">
+        <h3>株価 × ニュース指標</h3>
+        <div class="controls inline">
+          <label>右軸（株価／指数）
+            <select id="price-symbol" multiple size="4"></select>
+          </label>
+          <label>左軸（ニュース指標）
+            <select id="news-metric">
+              <option value="heat_index">Heat指数</option>
+              <option value="sent_weighted" selected>センチメント指数</option>
+              <option value="n_articles">件数</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="rebase-chk" checked /> 2024-01-01 = 100 で指数化</label>
+        </div>
+        <div id="chart-overlay" class="chart tall"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Entities tab ---------- -->
+  <section id="tab-entities" class="tab-panel">
+    <div id="entities-table"></div>
+    <div id="entities-chart" class="chart tall"></div>
+  </section>
+
+  <!-- ---------- Articles tab ---------- -->
+  <section id="tab-articles" class="tab-panel">
+    <div class="controls">
+      <input type="search" id="article-search" placeholder="キーワード検索" />
+      <select id="article-label">
+        <option value="">全ラベル</option>
+        <option value="positive">positive</option>
+        <option value="neutral">neutral</option>
+        <option value="negative">negative</option>
+      </select>
+      <select id="article-region">
+        <option value="">全地域</option>
+        <option value="global">global</option>
+        <option value="jp">jp</option>
+      </select>
+    </div>
+    <table id="article-table">
+      <thead>
+        <tr>
+          <th>日付</th><th>媒体</th><th>地域</th><th>タイトル</th><th>ラベル</th><th>Score</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="paging"><button id="load-more">さらに読み込む</button></div>
+  </section>
+
+  <!-- ---------- About tab ---------- -->
+  <section id="tab-about" class="tab-panel">
+    <h2>Methodology</h2>
+    <ul>
+      <li><b>対象</b>: プライベートクレジット／BDC（Business Development Company）に関する国内外のニュース</li>
+      <li><b>期間</b>: 2024-01-01〜現在（GitHub Actions 毎日 07:00 JST 更新）</li>
+      <li><b>関連性判定</b>: MUST/SHOULD/EXCLUDE の 3 層キーワードゲート（<code>config/keywords.yaml</code>）</li>
+      <li><b>センチメント</b>: <b>完全オフライン</b> — 英語は Loughran-McDonald 金融極性辞書、日本語は独自辞書＋oseti、フレーズ単位ドメイン・オーバーライド。外部 API は使用しない</li>
+      <li><b>株価</b>: yfinance（Yahoo Finance）からの日次終値。BIZD 構成上位 12 社＋ベンチマーク（BIZD, ^GSPC, HYG）</li>
+      <li><b>重ね描き</b>: 2024-01-01 を 100 とした指数化切替、20d/60d 移動平均オーバーレイ</li>
+    </ul>
+    <h2>データソース</h2>
+    <ul>
+      <li>Google News RSS（英／日キーワード検索）</li>
+      <li>GDELT 2.0 Article Search API（海外広範）</li>
+      <li>SEC EDGAR Full-Text Search（N-2, 10-K, 10-Q, 8-K）</li>
+      <li>任意 RSS フィード（<code>config/sources.yaml</code> で管理）</li>
+    </ul>
+    <h2>免責</h2>
+    <p>本ダッシュボードは個別銘柄の投資助言ではありません。原典リンクから一次情報をご確認ください。記事本文は保存・再配信していません。</p>
+    <h2>ライセンス</h2>
+    <ul>
+      <li>コード: MIT</li>
+      <li>Loughran-McDonald Master Dictionary: 出典明記のうえ利用可（Notre Dame SRAF）</li>
+      <li>oseti: MIT / 日本語評価極性辞書: CC BY-SA 4.0</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <small>bdc-news-monitor — generated offline, no external API</small>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Source credibility weights used when computing the weighted sentiment index.
+# Default 0.5 for unlisted sources.
+
+sources:
+  "bloomberg.com": 1.0
+  "bloomberg.co.jp": 1.0
+  "reuters.com": 1.0
+  "jp.reuters.com": 1.0
+  "ft.com": 1.0
+  "wsj.com": 1.0
+  "barrons.com": 0.9
+  "sec.gov": 1.0
+  "nikkei.com": 1.0
+  "privatedebtinvestor.com": 1.0
+  "pionline.com": 0.9
+  "spglobal.com": 0.9
+  "moodys.com": 0.9
+  "fitchratings.com": 0.9
+  "pitchbook.com": 0.9
+  "creditflux.com": 0.9
+  "9fin.com": 0.9
+  "debtwire.com": 0.9
+  "seekingalpha.com": 0.4
+  "marketwatch.com": 0.7
+  "cnbc.com": 0.7
+  "finance.yahoo.com": 0.5
+  "diamond.jp": 0.7
+  "toyokeizai.net": 0.7
+  "quick.co.jp": 0.8
+
+default: 0.5
