@@ -121,6 +121,59 @@ main { padding: 20px 24px 48px; max-width: 1400px; margin: 0 auto; }
 }
 #entities-table th { background: #12171d; color: var(--muted); font-weight: 500; }
 
+/* ---- Issue #3: per-entity drilldown ---- */
+.entity-detail {
+  padding: 16px 24px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.entity-detail[hidden] { display: none; }
+.entity-back {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.entity-back:hover { color: var(--accent); }
+.entity-header h2 { margin: 0 0 4px; font-size: 22px; }
+.entity-meta { color: var(--muted); font-size: 13px; display: flex; gap: 16px; align-items: baseline; }
+.entity-meta .muted { color: var(--muted); }
+.entity-meta .pos { color: var(--pos); font-weight: 600; }
+.entity-meta .neg { color: var(--neg); font-weight: 600; }
+
+.kpi-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin: 16px 0;
+}
+.kpi-card {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: 8px; padding: 12px 14px;
+}
+.kpi-label { color: var(--muted); font-size: 11px; }
+.kpi-value { font-size: 22px; font-weight: 600; margin: 4px 0 2px; }
+.kpi-delta { font-size: 11px; color: var(--muted); }
+.kpi-delta.pos { color: var(--pos); }
+.kpi-delta.neg { color: var(--neg); }
+
+#entity-articles table, #entity-peers table, #entity-metrics-table table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+#entity-articles th, #entity-articles td,
+#entity-peers th, #entity-peers td,
+#entity-metrics-table th, #entity-metrics-table td {
+  padding: 6px 8px; border-bottom: 1px solid var(--card-border);
+  text-align: left; vertical-align: top;
+}
+#entity-articles th, #entity-peers th, #entity-metrics-table th {
+  color: var(--muted); font-weight: 500;
+}
+.entity-link { cursor: pointer; color: var(--accent); }
+.entity-link:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .kpi-cards { grid-template-columns: 1fr; }
+}
+
 footer { text-align: center; padding: 16px; color: var(--muted); font-size: 11px; }
 
 @media (max-width: 900px) {

@@ -6,8 +6,10 @@
     articles: [],
     prices: { series: {} },
     entities: [],
+    quarterly: { series: {} },
     meta: {},
     articleCursor: 50,
+    activeTicker: null,
   };
 
   const plotlyConfig = { displayModeBar: false, responsive: true };
@@ -34,6 +36,9 @@
         loadJSON("data/articles.json").then((d) => (state.articles = (d && d.items) || [])),
         loadJSON("data/prices.json").then((d) => (state.prices = d || { series: {} })),
         loadJSON("data/by_entity.json").then((d) => (state.entities = (d && d.items) || [])),
+        loadJSON("data/quarterly_metrics.json").then(
+          (d) => (state.quarterly = d || { series: {} })
+        ),
         loadJSON("data/meta.json").then((d) => (state.meta = d || {})),
       ]);
     } catch (e) {
@@ -43,6 +48,8 @@
     populatePriceSymbols();
     populateEventOptions();
     renderAll();
+    wireRouter();
+    handleRoute();
   }
 
   async function loadJSON(url) {
@@ -60,6 +67,9 @@
   function wireTabs() {
     document.querySelectorAll(".tab").forEach((btn) => {
       btn.addEventListener("click", () => {
+        if (location.hash) {
+          location.hash = "";
+        }
         const id = btn.dataset.tab;
         document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
         document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
@@ -358,7 +368,7 @@
       .map(
         (e) => `
         <tr>
-          <td><b>${e.symbol}</b></td><td>${e.name}</td>
+          <td><a class="entity-link" href="#/entity/${e.symbol}"><b>${e.symbol}</b></a></td><td>${e.name}</td>
           <td>${e.n}</td><td>${e.pos}</td><td>${e.neg}</td>
           <td>${e.sent_mean.toFixed(3)}</td>
         </tr>`
@@ -466,5 +476,328 @@
     return (s || "").replace(/[&<>"']/g, (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
     );
+  }
+
+  // =========================================================================
+  // Issue #3 — per-entity drilldown
+  // =========================================================================
+  function wireRouter() {
+    window.addEventListener("hashchange", handleRoute);
+    const back = document.getElementById("entity-back");
+    if (back) {
+      back.addEventListener("click", (e) => {
+        e.preventDefault();
+        location.hash = "";
+      });
+    }
+  }
+
+  function handleRoute() {
+    const m = (location.hash || "").match(/^#\/entity\/([A-Za-z0-9._-]+)/);
+    if (!m) {
+      showOverview();
+      return;
+    }
+    const ticker = m[1].toUpperCase();
+    state.activeTicker = ticker;
+    showEntity(ticker);
+  }
+
+  function showOverview() {
+    document.getElementById("entity-detail").hidden = true;
+    document.querySelector("main").hidden = false;
+    document.querySelector(".tabs").hidden = false;
+  }
+
+  function showEntity(ticker) {
+    const detail = document.getElementById("entity-detail");
+    detail.hidden = false;
+    document.querySelector("main").hidden = true;
+    document.querySelector(".tabs").hidden = true;
+
+    const entityRow = state.entities.find((e) => e.symbol === ticker);
+    const fullName = entityRow ? entityRow.name : ticker;
+    document.getElementById("entity-title").textContent = ticker;
+    document.getElementById("entity-name").textContent = fullName;
+
+    renderEntityPriceMeta(ticker);
+    renderEntityKPIs(ticker);
+    renderEntityOverlay(ticker);
+    renderEntityEventTimeline(ticker);
+    renderEntityMetricsTable(ticker);
+    renderEntityArticles(ticker);
+    renderEntityPeers(ticker);
+    window.scrollTo({ top: 0 });
+  }
+
+  // ------------------------------------ price + day-change in header
+  function renderEntityPriceMeta(ticker) {
+    const series = (state.prices.series || {})[ticker] || [];
+    const priceEl = document.getElementById("entity-price");
+    const chgEl = document.getElementById("entity-change");
+    if (series.length < 2) {
+      priceEl.textContent = "";
+      chgEl.textContent = "";
+      return;
+    }
+    const last = series[series.length - 1];
+    const prev = series[series.length - 2];
+    const chg = last.close - prev.close;
+    const chgPct = (chg / prev.close) * 100;
+    priceEl.textContent = `$${last.close.toFixed(2)} (${last.date})`;
+    chgEl.textContent = `${chg >= 0 ? "+" : ""}${chg.toFixed(2)} (${chgPct.toFixed(2)}%)`;
+    chgEl.className = chg >= 0 ? "pos" : "neg";
+  }
+
+  // ------------------------------------ KPI cards from quarterly metrics
+  function renderEntityKPIs(ticker) {
+    const series = ((state.quarterly.series || {})[ticker] || []).slice();
+    series.sort((a, b) => (a.fiscal_period > b.fiscal_period ? 1 : -1));
+    const last = series[series.length - 1] || null;
+    const prev = series[series.length - 2] || null;
+
+    setKPI("kpi-nav", "kpi-nav-d", last && last.nav_per_share, prev && prev.nav_per_share, "$");
+    setKPI(
+      "kpi-nii", "kpi-nii-d",
+      last && last.net_investment_income_per_share,
+      prev && prev.net_investment_income_per_share,
+      "$"
+    );
+    setKPI(
+      "kpi-cov", "kpi-cov-d",
+      last && last.asset_coverage_ratio,
+      prev && prev.asset_coverage_ratio,
+      "",
+      "x"
+    );
+  }
+
+  function setKPI(valId, deltaId, cur, prev, prefix = "", suffix = "") {
+    const v = document.getElementById(valId);
+    const d = document.getElementById(deltaId);
+    if (cur == null) {
+      v.textContent = "—";
+      d.textContent = "";
+      d.className = "kpi-delta";
+      return;
+    }
+    v.textContent = `${prefix}${Number(cur).toFixed(2)}${suffix}`;
+    if (prev == null) {
+      d.textContent = "前期データなし";
+      d.className = "kpi-delta";
+      return;
+    }
+    const diff = cur - prev;
+    const pct = prev !== 0 ? (diff / prev) * 100 : 0;
+    d.textContent = `${diff >= 0 ? "+" : ""}${diff.toFixed(2)} (${pct.toFixed(1)}%)`;
+    d.className = "kpi-delta " + (diff >= 0 ? "pos" : "neg");
+  }
+
+  // ------------------------------------ overlay chart (price + sentiment)
+  function renderEntityOverlay(ticker) {
+    const priceSeries = (state.prices.series || {})[ticker] || [];
+    const articleHits = state.articles.filter((a) => mentionsTicker(a, ticker));
+    const byDate = new Map();
+    for (const a of articleHits) {
+      if (!a.published_at || a.sentiment == null) continue;
+      const d = a.published_at.slice(0, 10);
+      if (!byDate.has(d)) byDate.set(d, { sum: 0, n: 0 });
+      const b = byDate.get(d);
+      b.sum += a.sentiment;
+      b.n += 1;
+    }
+    const sentRows = [...byDate.entries()]
+      .map(([date, b]) => ({ date, sent: b.sum / b.n }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    const traces = [];
+    if (sentRows.length) {
+      traces.push({
+        x: sentRows.map((r) => r.date),
+        y: sentRows.map((r) => r.sent),
+        name: "sentiment (daily mean)",
+        yaxis: "y",
+        type: "scatter",
+        mode: "markers",
+        marker: { color: "#58a6ff", size: 5 },
+      });
+    }
+    if (priceSeries.length) {
+      traces.push({
+        x: priceSeries.map((p) => p.date),
+        y: priceSeries.map((p) => p.close),
+        name: `${ticker} close`,
+        yaxis: "y2",
+        type: "scatter",
+        mode: "lines",
+        line: { color: "#3fb950", width: 1.5 },
+      });
+    }
+    const layout = {
+      ...plotlyLayoutBase,
+      xaxis: { ...plotlyLayoutBase.xaxis },
+      yaxis: { ...plotlyLayoutBase.yaxis, title: "sentiment", range: [-1, 1], zeroline: true, zerolinecolor: "#444" },
+      yaxis2: { title: "price ($)", overlaying: "y", side: "right", gridcolor: "#222a33" },
+      legend: { orientation: "h", y: -0.2 },
+    };
+    Plotly.newPlot("entity-chart-overlay", traces, layout, plotlyConfig);
+  }
+
+  // ------------------------------------ event timeline (lanes per category)
+  function renderEntityEventTimeline(ticker) {
+    const hits = state.articles.filter((a) => mentionsTicker(a, ticker) && (a.event_tags || []).length);
+    if (!hits.length) {
+      Plotly.purge("entity-chart-events");
+      const el = document.getElementById("entity-chart-events");
+      el.innerHTML = '<div style="padding:24px;color:var(--muted);font-size:12px">イベントタグ付き記事なし</div>';
+      return;
+    }
+    document.getElementById("entity-chart-events").innerHTML = "";
+    const sevColor = { high: "#f85149", medium: "#d29922", low: "#8b949e" };
+    const points = [];
+    for (const a of hits) {
+      if (!a.published_at) continue;
+      const d = a.published_at.slice(0, 10);
+      for (const t of a.event_tags) {
+        points.push({
+          x: d,
+          y: t,
+          color: sevColor[a.event_severity] || "#58a6ff",
+          text: `${(a.title || "").slice(0, 80)}<br>${a.source || ""}`,
+        });
+      }
+    }
+    const traces = [
+      {
+        x: points.map((p) => p.x),
+        y: points.map((p) => p.y),
+        text: points.map((p) => p.text),
+        hovertemplate: "%{x}<br>%{y}<br>%{text}<extra></extra>",
+        type: "scatter",
+        mode: "markers",
+        marker: { color: points.map((p) => p.color), size: 9, line: { width: 0.5, color: "#0f1419" } },
+      },
+    ];
+    Plotly.newPlot(
+      "entity-chart-events",
+      traces,
+      {
+        ...plotlyLayoutBase,
+        yaxis: { ...plotlyLayoutBase.yaxis, automargin: true, tickfont: { size: 10 } },
+        margin: { l: 140, r: 32, t: 12, b: 32 },
+      },
+      plotlyConfig
+    );
+  }
+
+  // ------------------------------------ quarterly metrics table
+  function renderEntityMetricsTable(ticker) {
+    const series = ((state.quarterly.series || {})[ticker] || []).slice();
+    if (!series.length) {
+      document.getElementById("entity-metrics-table").innerHTML =
+        '<p style="color:var(--muted);font-size:12px">XBRLメトリクス未取得（CIキャッシュ生成後に表示）</p>';
+      return;
+    }
+    series.sort((a, b) => (a.fiscal_period > b.fiscal_period ? -1 : 1));
+    const fmt = (v, dp = 2) => (v == null ? "—" : Number(v).toFixed(dp));
+    const fmtBig = (v) => (v == null ? "—" : `$${(v / 1e9).toFixed(2)}B`);
+    const rows = series
+      .map(
+        (r) => `
+        <tr>
+          <td>${escapeHTML(r.fiscal_period)}</td>
+          <td>${escapeHTML(r.form_type || "")}</td>
+          <td>${escapeHTML(r.filing_date || "")}</td>
+          <td>${fmt(r.nav_per_share, 4)}</td>
+          <td>${fmt(r.net_investment_income_per_share, 4)}</td>
+          <td>${fmt(r.distribution_per_share, 4)}</td>
+          <td>${fmtBig(r.total_investments_at_fair_value)}</td>
+          <td>${fmt(r.asset_coverage_ratio)}</td>
+        </tr>`
+      )
+      .join("");
+    document.getElementById("entity-metrics-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>期</th><th>Form</th><th>提出日</th>
+          <th>NAV/株</th><th>NII/株</th><th>配当/株</th>
+          <th>投資額(時価)</th><th>Asset Cov.</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // ------------------------------------ recent articles for the ticker
+  function renderEntityArticles(ticker) {
+    const hits = state.articles
+      .filter((a) => mentionsTicker(a, ticker))
+      .slice()
+      .sort((a, b) => (b.published_at || "").localeCompare(a.published_at || ""))
+      .slice(0, 25);
+    if (!hits.length) {
+      document.getElementById("entity-articles").innerHTML =
+        '<p style="color:var(--muted);font-size:12px">該当記事なし</p>';
+      return;
+    }
+    const rows = hits
+      .map(
+        (a) => `
+        <tr>
+          <td>${(a.published_at || "").slice(0, 10)}</td>
+          <td>${escapeHTML(a.source || "")}</td>
+          <td><a href="${a.url}" target="_blank" rel="noopener">${escapeHTML(a.title)}</a></td>
+          <td>${renderEventBadges(a)}</td>
+          <td>${a.label ? `<span class="label-pill ${a.label}">${a.label}</span>` : "—"}</td>
+        </tr>`
+      )
+      .join("");
+    document.getElementById("entity-articles").innerHTML = `
+      <table>
+        <thead><tr><th>日付</th><th>媒体</th><th>タイトル</th><th>イベント</th><th>ラベル</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // ------------------------------------ peer comparison table
+  function renderEntityPeers(ticker) {
+    const sortedPeers = state.entities.slice().sort((a, b) => b.n - a.n);
+    const focus = state.entities.find((e) => e.symbol === ticker);
+    const top5 = sortedPeers.filter((e) => e.symbol !== ticker).slice(0, 5);
+    const rows = (focus ? [focus, ...top5] : top5)
+      .map((e) => {
+        const q = ((state.quarterly.series || {})[e.symbol] || []).slice();
+        q.sort((a, b) => (a.fiscal_period > b.fiscal_period ? 1 : -1));
+        const last = q[q.length - 1] || {};
+        const isFocus = e.symbol === ticker;
+        const fmt = (v, dp = 2) => (v == null ? "—" : Number(v).toFixed(dp));
+        return `
+          <tr>
+            <td>${isFocus ? "<b>" + e.symbol + "</b>" : `<a class="entity-link" href="#/entity/${e.symbol}">${e.symbol}</a>`}</td>
+            <td>${escapeHTML(e.name)}</td>
+            <td>${e.n}</td>
+            <td>${fmt(e.sent_mean, 3)}</td>
+            <td>${fmt(last.nav_per_share, 4)}</td>
+            <td>${fmt(last.net_investment_income_per_share, 4)}</td>
+            <td>${fmt(last.asset_coverage_ratio)}</td>
+          </tr>`;
+      })
+      .join("");
+    document.getElementById("entity-peers").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Symbol</th><th>Name</th><th>記事数</th><th>平均Sent</th>
+          <th>NAV/株</th><th>NII/株</th><th>Asset Cov.</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // ------------------------------------ helper: ticker mention test
+  function mentionsTicker(article, ticker) {
+    const blob = `${article.title || ""} ${article.snippet || ""}`.toLowerCase();
+    if (blob.includes(ticker.toLowerCase())) return true;
+    const entity = state.entities.find((e) => e.symbol === ticker);
+    if (entity && entity.name && blob.includes(entity.name.toLowerCase())) return true;
+    return false;
   }
 })();

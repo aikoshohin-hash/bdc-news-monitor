@@ -22,6 +22,32 @@
   </nav>
 </header>
 
+<div id="entity-detail" class="entity-detail" hidden>
+  <a href="#" id="entity-back" class="entity-back">← Overview に戻る</a>
+  <header class="entity-header">
+    <h2 id="entity-title">—</h2>
+    <div class="entity-meta">
+      <span id="entity-name" class="muted"></span>
+      <span id="entity-price"></span>
+      <span id="entity-change"></span>
+    </div>
+  </header>
+
+  <section class="kpi-cards">
+    <div class="kpi-card"><div class="kpi-label">NAV / share</div><div class="kpi-value" id="kpi-nav">—</div><div class="kpi-delta" id="kpi-nav-d"></div></div>
+    <div class="kpi-card"><div class="kpi-label">NII / share (latest)</div><div class="kpi-value" id="kpi-nii">—</div><div class="kpi-delta" id="kpi-nii-d"></div></div>
+    <div class="kpi-card"><div class="kpi-label">Asset Coverage</div><div class="kpi-value" id="kpi-cov">—</div><div class="kpi-delta" id="kpi-cov-d"></div></div>
+  </section>
+
+  <div class="grid">
+    <div class="card wide"><h3>株価 × ニュース指標</h3><div id="entity-chart-overlay" class="chart tall"></div></div>
+    <div class="card wide"><h3>イベント・タイムライン</h3><div id="entity-chart-events" class="chart"></div></div>
+    <div class="card wide"><h3>四半期メトリクス（XBRL）</h3><div id="entity-metrics-table"></div></div>
+    <div class="card wide"><h3>直近記事（Heat順）</h3><div id="entity-articles"></div></div>
+    <div class="card wide"><h3>ピア比較（記事件数上位 + 当該銘柄）</h3><div id="entity-peers"></div></div>
+  </div>
+</div>
+
 <main>
   <!-- ---------- Overview tab ---------- -->
   <section id="tab-overview" class="tab-panel active">
