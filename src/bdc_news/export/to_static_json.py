@@ -11,7 +11,13 @@ from sqlalchemy import select
 
 from bdc_news.paths import DOCS_DATA_DIR
 from bdc_news.pipeline.aggregator import compute_daily_index, _region_of, _domain_of
-from bdc_news.storage.models import Article, ArticleScore, Price, get_session
+from bdc_news.storage.models import (
+    Article,
+    ArticleScore,
+    BdcQuarterlyMetric,
+    Price,
+    get_session,
+)
 
 log = logging.getLogger(__name__)
 
@@ -224,6 +230,45 @@ def export_by_entity() -> int:
     return len(items)
 
 
+def export_quarterly_metrics() -> int:
+    """Issue #2: dump bdc_quarterly_metrics grouped by ticker."""
+    by_ticker: dict[str, list[dict]] = defaultdict(list)
+    with get_session() as s:
+        rows = s.execute(
+            select(BdcQuarterlyMetric).order_by(
+                BdcQuarterlyMetric.ticker, BdcQuarterlyMetric.fiscal_period
+            )
+        ).scalars().all()
+        for r in rows:
+            by_ticker[r.ticker].append(
+                {
+                    "fiscal_period": r.fiscal_period,
+                    "fiscal_year": r.fiscal_year,
+                    "fiscal_quarter": r.fiscal_quarter,
+                    "form_type": r.form_type,
+                    "filing_date": r.filing_date.isoformat() if r.filing_date else None,
+                    "nav_per_share": r.nav_per_share,
+                    "total_investments_at_fair_value": r.total_investments_at_fair_value,
+                    "net_investment_income_per_share": r.net_investment_income_per_share,
+                    "distribution_per_share": r.distribution_per_share,
+                    "non_accruals_pct_at_cost": r.non_accruals_pct_at_cost,
+                    "non_accruals_pct_at_fair_value": r.non_accruals_pct_at_fair_value,
+                    "pik_income_pct_of_total_income": r.pik_income_pct_of_total_income,
+                    "asset_coverage_ratio": r.asset_coverage_ratio,
+                    "weighted_avg_yield_debt_investments": r.weighted_avg_yield_debt_investments,
+                    "first_lien_pct": r.first_lien_pct,
+                    "second_lien_pct": r.second_lien_pct,
+                    "filing_url": r.filing_url,
+                    "extraction_source": r.extraction_source,
+                }
+            )
+    _write(
+        DOCS_DATA_DIR / "quarterly_metrics.json",
+        {"generated_at": _now(), "series": by_ticker},
+    )
+    return sum(len(v) for v in by_ticker.values())
+
+
 def export_meta(extra: dict | None = None) -> None:
     meta = {
         "generated_at": _now(),
@@ -241,6 +286,7 @@ def export_all() -> dict:
     n_monthly = export_monthly_index()
     n_prices = export_prices()
     n_entities = export_by_entity()
+    n_metrics = export_quarterly_metrics()
     export_meta(
         {
             "counts": {
@@ -249,6 +295,7 @@ def export_all() -> dict:
                 "monthly_rows": n_monthly,
                 "price_points": n_prices,
                 "entities": n_entities,
+                "quarterly_metrics": n_metrics,
             }
         }
     )
@@ -258,6 +305,7 @@ def export_all() -> dict:
         "monthly": n_monthly,
         "prices": n_prices,
         "entities": n_entities,
+        "quarterly_metrics": n_metrics,
     }
 
 

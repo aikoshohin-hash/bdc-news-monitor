@@ -120,6 +120,7 @@
       <li><b>関連性判定</b>: MUST/SHOULD/EXCLUDE の 3 層キーワードゲート（<code>config/keywords.yaml</code>）</li>
       <li><b>センチメント</b>: <b>完全オフライン</b> — 英語は Loughran-McDonald 金融極性辞書、日本語は独自辞書＋oseti、フレーズ単位ドメイン・オーバーライド。外部 API は使用しない</li>
       <li><b>株価</b>: yfinance（Yahoo Finance）からの日次終値。BIZD 構成上位 12 社＋ベンチマーク（BIZD, ^GSPC, HYG）</li>
+      <li><b>四半期メトリクス</b>: SEC EDGAR XBRL companyfacts API（無償・無認証）から NAV/share、総投資額（時価）、NII/share、配当/株、Asset Coverage 等を抽出。<code>data/edgar_cache/</code> にレスポンスをキャッシュし再現性を確保（Issue #2）</li>
       <li><b>重ね描き</b>: 2024-01-01 を 100 とした指数化切替、20d/60d 移動平均オーバーレイ</li>
     </ul>
     <h2>データソース</h2>

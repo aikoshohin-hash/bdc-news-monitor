@@ -11,6 +11,7 @@ from sqlalchemy import select
 from bdc_news.storage.models import (
     Article,
     ArticleScore,
+    BdcQuarterlyMetric,
     DailyIndex,
     Price,
     get_session,
@@ -170,6 +171,37 @@ def upsert_price(symbol: str, d: date, close: float, volume: float | None = None
             existing.volume = volume
         else:
             s.add(Price(symbol=symbol, date=d, close=close, volume=volume))
+
+
+def upsert_quarterly_metric(row: dict) -> None:
+    """Insert or update a BdcQuarterlyMetric row keyed by (ticker, fiscal_period).
+
+    Pass a dict produced by ``QuarterlyMetric.to_db_kwargs()``. None values
+    are written as-is (the spec allows nulls when an extractor cannot find
+    a metric).
+    """
+    with get_session() as s:
+        existing = s.execute(
+            select(BdcQuarterlyMetric).where(
+                BdcQuarterlyMetric.ticker == row["ticker"],
+                BdcQuarterlyMetric.fiscal_period == row["fiscal_period"],
+            )
+        ).scalar_one_or_none()
+        if existing:
+            for k, v in row.items():
+                setattr(existing, k, v)
+        else:
+            s.add(BdcQuarterlyMetric(**row))
+
+
+def iter_quarterly_metrics(ticker: str | None = None) -> list[BdcQuarterlyMetric]:
+    with get_session() as s:
+        stmt = select(BdcQuarterlyMetric).order_by(
+            BdcQuarterlyMetric.ticker, BdcQuarterlyMetric.fiscal_period
+        )
+        if ticker:
+            stmt = stmt.where(BdcQuarterlyMetric.ticker == ticker)
+        return list(s.execute(stmt).scalars())
 
 
 def upsert_daily_index(row: dict) -> None:

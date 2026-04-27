@@ -105,6 +105,40 @@ class Price(Base):
     volume = Column(Float)
 
 
+class BdcQuarterlyMetric(Base):
+    """Issue #2: BDC structured financial metrics from EDGAR 10-Q/10-K.
+
+    One row per (ticker, fiscal_period). Extractable metrics live alongside
+    fields that may be null when an extractor cannot find them — the spec
+    requires the pipeline to keep going on extraction failure.
+    """
+    __tablename__ = "bdc_quarterly_metrics"
+    __table_args__ = (UniqueConstraint("ticker", "fiscal_period", name="uq_ticker_period"),)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ticker = Column(String(16), index=True)
+    cik = Column(String(16))
+    filing_date = Column(Date)
+    fiscal_period = Column(String(16), index=True)  # "2025Q3" or "2025FY"
+    fiscal_year = Column(Integer)
+    fiscal_quarter = Column(Integer)  # 1-4 or null for 10-K
+    form_type = Column(String(8))  # "10-Q" / "10-K"
+    nav_per_share = Column(Float)
+    total_investments_at_fair_value = Column(Float)
+    net_investment_income_per_share = Column(Float)
+    distribution_per_share = Column(Float)
+    non_accruals_pct_at_cost = Column(Float)
+    non_accruals_pct_at_fair_value = Column(Float)
+    pik_income_pct_of_total_income = Column(Float)
+    asset_coverage_ratio = Column(Float)
+    weighted_avg_yield_debt_investments = Column(Float)
+    first_lien_pct = Column(Float)
+    second_lien_pct = Column(Float)
+    filing_url = Column(Text)
+    extraction_source = Column(String(32))  # "xbrl" / "regex" / "manual"
+    extracted_at = Column(DateTime, default=datetime.utcnow)
+
+
 _engine = None
 _SessionLocal = None
 

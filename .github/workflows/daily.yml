@@ -52,6 +52,13 @@ jobs:
       - name: Tag events
         run: bdc-news tag-events
 
+      - name: EDGAR quarterly metrics
+        env:
+          # SEC Fair Access policy requires a contact-bearing User-Agent.
+          # GitHub Actions noreply email keeps it bot-style without exposing PII.
+          SEC_EDGAR_USER_AGENT: "bdc-news-monitor (research; contact: 41898282+github-actions[bot]@users.noreply.github.com)"
+        run: bdc-news edgar-metrics || true
+
       - name: Prices
         run: bdc-news prices || true
 

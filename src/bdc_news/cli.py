@@ -188,6 +188,45 @@ def tag_events(
     typer.echo(f"tag-events done: processed={n_tagged} with_tags={n_with_tags}")
 
 
+@app.command("edgar-metrics")
+def edgar_metrics(
+    ticker: str = typer.Option(None, help="Single ticker (default: all in config/edgar_ciks.yaml)"),
+    max_periods: int = typer.Option(12, help="Max recent periods per ticker (8 quarters + 2 FY = 10)"),
+    offline: bool = typer.Option(False, help="Use only cached data (no network)"),
+) -> None:
+    """Issue #2: extract quarterly metrics from SEC EDGAR XBRL companyfacts.
+
+    Pulls structured financial concepts (NAV/share, total investments at FV,
+    NII/share, distributions, asset coverage) from the free companyfacts
+    API and upserts ``bdc_quarterly_metrics`` rows. Failures per-ticker are
+    logged and skipped — pipeline keeps going (per spec).
+    """
+    _setup_logging()
+    init_db()
+    from bdc_news.extractors import EdgarClient, EdgarMetricsExtractor
+    extractor = EdgarMetricsExtractor(client=EdgarClient(offline=offline))
+    tickers: list[str]
+    if ticker:
+        tickers = [ticker]
+    else:
+        tickers = list(extractor.cik_map.keys())
+    n_total = 0
+    n_failed = 0
+    for t in tickers:
+        try:
+            records = extractor.extract_for_ticker(t, max_periods=max_periods)
+        except Exception as e:  # noqa: BLE001
+            logging.getLogger(__name__).warning("edgar-metrics %s failed: %s", t, e)
+            n_failed += 1
+            continue
+        for rec in records:
+            repo.upsert_quarterly_metric(rec.to_db_kwargs())
+        n_total += len(records)
+    typer.echo(
+        f"edgar-metrics done: tickers={len(tickers)} rows={n_total} failed={n_failed}"
+    )
+
+
 @app.command()
 def prices(start: str = typer.Option(None, help="YYYY-MM-DD; defaults to config")) -> None:
     """Fetch daily close prices for configured tickers via yfinance."""
@@ -210,11 +249,12 @@ def export() -> None:
 
 @app.command("run-all")
 def run_all() -> None:
-    """Collect → classify → score → tag-events → prices → export."""
+    """Collect → classify → score → tag-events → edgar-metrics → prices → export."""
     collect()
     classify()
     score()
     tag_events()
+    edgar_metrics()
     prices()
     export()
 
