@@ -41,6 +41,7 @@
     }
     renderHeader();
     populatePriceSymbols();
+    populateEventOptions();
     renderAll();
   }
 
@@ -83,6 +84,10 @@
         renderArticles();
       })
     );
+    document.getElementById("article-events").addEventListener("change", () => {
+      state.articleCursor = 50;
+      renderArticles();
+    });
     document.getElementById("load-more").addEventListener("click", () => {
       state.articleCursor += 50;
       renderArticles();
@@ -114,6 +119,32 @@
       const opt = document.createElement("option");
       opt.textContent = "(株価データ未生成)";
       opt.disabled = true;
+      sel.appendChild(opt);
+    }
+  }
+
+  function populateEventOptions() {
+    const sel = document.getElementById("article-events");
+    if (!sel) return;
+    const counts = new Map();
+    for (const a of state.articles) {
+      for (const t of a.event_tags || []) {
+        counts.set(t, (counts.get(t) || 0) + 1);
+      }
+    }
+    const tags = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    sel.innerHTML = "";
+    if (!tags.length) {
+      const opt = document.createElement("option");
+      opt.textContent = "(イベントタグ未生成)";
+      opt.disabled = true;
+      sel.appendChild(opt);
+      return;
+    }
+    for (const [tag, n] of tags) {
+      const opt = document.createElement("option");
+      opt.value = tag;
+      opt.textContent = `${tag} (${n})`;
       sel.appendChild(opt);
     }
   }
@@ -383,10 +414,20 @@
     const q = (document.getElementById("article-search").value || "").toLowerCase();
     const label = document.getElementById("article-label").value;
     const region = document.getElementById("article-region").value;
+    const eventSel = document.getElementById("article-events");
+    const selectedEvents = eventSel
+      ? [...eventSel.selectedOptions].map((o) => o.value).filter(Boolean)
+      : [];
     let rows = state.articles.slice();
     if (q) rows = rows.filter((r) => (r.title + " " + (r.snippet || "")).toLowerCase().includes(q));
     if (label) rows = rows.filter((r) => r.label === label);
     if (region) rows = rows.filter((r) => r.region === region);
+    if (selectedEvents.length) {
+      rows = rows.filter((r) => {
+        const tags = r.event_tags || [];
+        return selectedEvents.some((t) => tags.includes(t));
+      });
+    }
     const slice = rows.slice(0, state.articleCursor);
     const tbody = document.querySelector("#article-table tbody");
     tbody.innerHTML = slice
@@ -397,6 +438,7 @@
           <td>${a.source || ""}</td>
           <td>${a.region || ""}</td>
           <td><a href="${a.url}" target="_blank" rel="noopener">${escapeHTML(a.title)}</a></td>
+          <td>${renderEventBadges(a)}</td>
           <td>${a.label ? `<span class="label-pill ${a.label}">${a.label}</span>` : "—"}</td>
           <td>${a.sentiment == null ? "—" : a.sentiment.toFixed(3)}</td>
         </tr>`
@@ -404,6 +446,20 @@
       .join("");
     document.getElementById("load-more").style.display =
       rows.length > state.articleCursor ? "" : "none";
+  }
+
+  function renderEventBadges(a) {
+    const tags = a.event_tags || [];
+    if (!tags.length) return "—";
+    const sev = a.event_severity || "";
+    return tags
+      .map(
+        (t) =>
+          `<span class="event-badge sev-${escapeHTML(sev)}" title="${escapeHTML(t)}">${escapeHTML(
+            t
+          )}</span>`
+      )
+      .join(" ");
   }
 
   function escapeHTML(s) {

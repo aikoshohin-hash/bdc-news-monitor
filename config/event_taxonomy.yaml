@@ -1,0 +1,262 @@
+# BDC / Private Credit Event Taxonomy (Issue #1)
+#
+# 各イベント・カテゴリは以下のフィールドを持つ：
+#   description: 人間向け説明
+#   keywords_en : 英語キーワード／フレーズのリスト（部分一致、小文字化された記事テキストに対する find）
+#   keywords_jp : 日本語キーワード／フレーズのリスト
+#   patterns    : 正規表現（任意、re.I で評価）
+#   severity    : "high" / "medium" / "low" / null（null=無印、null は YAML で空にする）
+#   sub_types   : sub-classification 候補（任意、event_tagger は sub_types を別タグとして付与）
+#   sub_type_keywords:
+#     {sub_type_name: [phrases...]}
+#
+# 多ラベル前提：1記事に対して複数カテゴリが付く。
+
+events:
+
+  earnings:
+    description: "決算発表（NII, NAV, distribution coverage 等の言及）"
+    severity: medium
+    keywords_en:
+      - "reports q1"
+      - "reports q2"
+      - "reports q3"
+      - "reports q4"
+      - "reports first quarter"
+      - "reports second quarter"
+      - "reports third quarter"
+      - "reports fourth quarter"
+      - "earnings"
+      - "net investment income"
+      - " nii "
+      - "nav per share"
+      - "quarterly results"
+      - "fiscal results"
+    keywords_jp:
+      - "決算"
+      - "純投資利益"
+      - "1株あたり純資産"
+      - "四半期決算"
+    patterns:
+      - "\\bQ[1-4]\\s+(?:20\\d{2}|FY\\d{2})"   # Q3 2025, Q1 FY24
+      - "\\bfiscal\\s+(?:first|second|third|fourth)\\s+quarter"
+
+  non_accrual:
+    description: "non-accrual 計上（クレジットイベントの先行指標）"
+    severity: high
+    keywords_en:
+      - "non-accrual"
+      - "nonaccrual"
+      - "non accrual"
+      - "placed on non-accrual"
+      - "non-performing"
+      - "nonperforming"
+    keywords_jp:
+      - "ノンアクルーアル"
+      - "不良債権"
+
+  nav_decline:
+    description: "NAV 悪化"
+    severity: high
+    keywords_en:
+      - "nav declined"
+      - "nav decreased"
+      - "nav fell"
+      - "nav dropped"
+      - "writedown"
+      - "write-down"
+      - "write down"
+      - "marked down"
+      - "mark down"
+      - "impairment"
+      - "valuation loss"
+    keywords_jp:
+      - "NAV 低下"
+      - "NAV 減少"
+      - "減損"
+      - "評価損"
+
+  dividend_action:
+    description: "配当アクション（増配/減配/特別配当/維持）"
+    severity: medium
+    keywords_en:
+      - "raises dividend"
+      - "increases dividend"
+      - "boosts dividend"
+      - "cuts dividend"
+      - "reduces dividend"
+      - "suspends dividend"
+      - "special dividend"
+      - "supplemental distribution"
+      - "supplemental dividend"
+      - "maintains dividend"
+      - "declares dividend"
+      - "dividend payable"
+    keywords_jp:
+      - "増配"
+      - "減配"
+      - "特別配当"
+      - "配当維持"
+      - "配当発表"
+    sub_types: [dividend_raise, dividend_cut, special_dividend, dividend_maintained]
+    sub_type_keywords:
+      dividend_raise:
+        - "raises dividend"
+        - "increases dividend"
+        - "boosts dividend"
+        - "増配"
+      dividend_cut:
+        - "cuts dividend"
+        - "reduces dividend"
+        - "suspends dividend"
+        - "減配"
+      special_dividend:
+        - "special dividend"
+        - "supplemental distribution"
+        - "supplemental dividend"
+        - "特別配当"
+      dividend_maintained:
+        - "maintains dividend"
+        - "配当維持"
+
+  capital_action:
+    description: "資本性アクション（増資・自社株買い・社債発行 等）"
+    severity: medium
+    keywords_en:
+      - "secondary offering"
+      - "follow-on offering"
+      - "atm program"
+      - "at-the-market"
+      - "share repurchase"
+      - "buyback"
+      - "stock repurchase"
+      - "convertible notes"
+      - "convertible offering"
+      - "notes offering"
+      - "senior notes due"
+      - "rights offering"
+    keywords_jp:
+      - "公募増資"
+      - "自社株買い"
+      - "社債発行"
+      - "新株予約権"
+    sub_types: [secondary_offering, share_repurchase, convertible_issuance, debt_issuance, rights_offering]
+    sub_type_keywords:
+      secondary_offering:
+        - "secondary offering"
+        - "follow-on offering"
+        - "atm program"
+        - "at-the-market"
+        - "公募増資"
+      share_repurchase:
+        - "share repurchase"
+        - "buyback"
+        - "stock repurchase"
+        - "自社株買い"
+      convertible_issuance:
+        - "convertible notes"
+        - "convertible offering"
+        - "新株予約権"
+      debt_issuance:
+        - "notes offering"
+        - "senior notes due"
+        - "社債発行"
+      rights_offering:
+        - "rights offering"
+
+  m_and_a:
+    description: "M&A・統合"
+    severity: medium
+    keywords_en:
+      - "merger"
+      - "acquisition"
+      - "to acquire"
+      - "agreement to acquire"
+      - "definitive agreement"
+      - "combination"
+      - "all-stock deal"
+    keywords_jp:
+      - "合併"
+      - "買収"
+      - "経営統合"
+
+  rating_action:
+    description: "格付変更（S&P / Moody's / Fitch）"
+    severity: high
+    keywords_en:
+      - "downgrade"
+      - "downgraded"
+      - "upgrade"
+      - "upgraded"
+      - "outlook negative"
+      - "outlook positive"
+      - "outlook stable"
+      - "credit rating"
+      - "affirms rating"
+    keywords_jp:
+      - "格下げ"
+      - "格上げ"
+      - "格付け引き下げ"
+      - "格付け引き上げ"
+    patterns:
+      - "\\b(?:s&p|moody'?s|fitch|kbra|dbrs)\\b"
+
+  regulatory:
+    description: "規制関連（SEC / FSOC / OCC / Fed / 金融庁）"
+    severity: medium
+    keywords_en:
+      - "sec rule"
+      - "sec proposal"
+      - "fsoc"
+      - "occ"
+      - "federal reserve"
+      - "private credit risk"
+      - "bdc rules"
+      - "shadow banking"
+      - "systemic risk"
+    keywords_jp:
+      - "金融庁"
+      - "プライベートクレジット"
+      - "規制"
+      - "監督指針"
+
+  personnel:
+    description: "経営陣変更（CEO/CFO 退任・新任）"
+    severity: low
+    keywords_en:
+      - "ceo"
+      - "cfo"
+      - "chief executive"
+      - "chief financial"
+      - "departure"
+      - "resigns"
+      - "appoints"
+      - "named ceo"
+      - "named cfo"
+      - "to step down"
+      - "succession"
+    keywords_jp:
+      - "ceo 交代"
+      - "cfo 交代"
+      - "退任"
+      - "就任"
+
+  portfolio_company:
+    description: "ポートフォリオ企業のイベント（再編・コベナンツ・破綻）"
+    severity: medium
+    keywords_en:
+      - "portfolio company"
+      - "amend and extend"
+      - "amendment and extension"
+      - "restructuring"
+      - "covenant"
+      - "covenant lite"
+      - "chapter 11"
+      - "bankruptcy"
+      - "out-of-court"
+      - "distressed exchange"
+    keywords_jp:
+      - "投資先企業"
+      - "債務再編"
+      - "民事再生"
+      - "破綻"

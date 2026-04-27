@@ -57,6 +57,12 @@ class ArticleScore(Base):
     pos_hits = Column(Integer, default=0)
     neg_hits = Column(Integer, default=0)
     scored_at = Column(DateTime, default=datetime.utcnow)
+    # Issue #1: BDC event taxonomy tags (JSON-encoded list[str]).
+    # Stored as JSON text so we can keep multi-label info without a side table.
+    event_tags = Column(Text, default="")
+    event_sub_tags = Column(Text, default="")
+    event_severity = Column(String(16))
+    event_confidence = Column(Float)
 
     article = relationship("Article", back_populates="scores")
 
@@ -109,8 +115,32 @@ def init_db(db_path: Path | None = None):
     target.parent.mkdir(parents=True, exist_ok=True)
     _engine = create_engine(f"sqlite:///{target}", future=True)
     Base.metadata.create_all(_engine)
+    _migrate_add_missing_columns(_engine)
     _SessionLocal = sessionmaker(bind=_engine, expire_on_commit=False, future=True)
     return _engine
+
+
+def _migrate_add_missing_columns(engine) -> None:
+    """Add columns introduced after the initial schema (idempotent, SQLite-only).
+
+    SQLite's ``CREATE TABLE IF NOT EXISTS`` does not add new columns to an
+    existing table. We inspect each model and ALTER TABLE for any missing one.
+    Called from ``init_db`` so upgrades are seamless for users with an existing
+    ``data/bdc_news.sqlite``.
+    """
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    for table in Base.metadata.sorted_tables:
+        if not insp.has_table(table.name):
+            continue
+        existing_cols = {c["name"] for c in insp.get_columns(table.name)}
+        with engine.begin() as conn:
+            for col in table.columns:
+                if col.name in existing_cols:
+                    continue
+                col_type = col.type.compile(dialect=engine.dialect)
+                conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {col_type}'))
 
 
 @contextmanager

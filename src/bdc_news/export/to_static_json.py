@@ -53,10 +53,23 @@ def export_articles() -> int:
                     "sentiment": float(sc.sentiment) if sc and sc.sentiment is not None else None,
                     "label": (sc.label if sc else None),
                     "confidence": float(sc.confidence) if sc and sc.confidence is not None else None,
+                    "event_tags": _decode_tag_list(sc.event_tags if sc else None),
+                    "event_sub_tags": _decode_tag_list(sc.event_sub_tags if sc else None),
+                    "event_severity": (sc.event_severity if sc else None),
                 }
             )
     _write(DOCS_DATA_DIR / "articles.json", {"generated_at": _now(), "items": items})
     return len(items)
+
+
+def _decode_tag_list(raw) -> list[str]:
+    if not raw:
+        return []
+    try:
+        v = json.loads(raw)
+        return v if isinstance(v, list) else []
+    except (TypeError, ValueError):
+        return []
 
 
 def export_daily_index() -> int:

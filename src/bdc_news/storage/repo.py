@@ -1,6 +1,7 @@
 """CRUD helpers for the articles / scores / prices tables."""
 from __future__ import annotations
 
+import json
 import uuid
 from datetime import datetime, date
 from typing import Iterable
@@ -100,6 +101,55 @@ def iter_unscored_relevant_articles(limit: int | None = None) -> list[Article]:
         if limit:
             stmt = stmt.limit(limit)
         return list(s.execute(stmt).scalars())
+
+
+def iter_relevant_articles_for_tagging(limit: int | None = None, only_untagged: bool = True) -> list[Article]:
+    """Iterate relevant articles that need event tagging.
+
+    If ``only_untagged`` is True (default), restricts to articles whose
+    ``ArticleScore.event_tags`` is null/empty. Pass False to re-tag all
+    relevant articles (e.g. after taxonomy changes).
+    """
+    with get_session() as s:
+        stmt = select(Article).where(Article.is_relevant == 1)
+        if only_untagged:
+            stmt = stmt.where(
+                Article.scores.any(
+                    (ArticleScore.event_tags.is_(None)) | (ArticleScore.event_tags == "")
+                )
+            )
+        if limit:
+            stmt = stmt.limit(limit)
+        return list(s.execute(stmt).scalars())
+
+
+def save_event_tags(
+    *,
+    article_id: str,
+    tags: list[str],
+    sub_tags: list[str],
+    severity: str | None,
+    confidence: float,
+) -> None:
+    """Persist event tags onto the latest ArticleScore row for an article.
+
+    Creates a placeholder ArticleScore if none exists yet (rare — usually
+    sentiment scoring runs first). Tags are JSON-encoded so the column stays
+    a single TEXT field.
+    """
+    with get_session() as s:
+        sc = (
+            s.execute(
+                select(ArticleScore).where(ArticleScore.article_id == article_id)
+            ).scalar_one_or_none()
+        )
+        if sc is None:
+            sc = ArticleScore(article_id=article_id, model="event-tagger")
+            s.add(sc)
+        sc.event_tags = json.dumps(tags, ensure_ascii=False)
+        sc.event_sub_tags = json.dumps(sub_tags, ensure_ascii=False)
+        sc.event_severity = severity
+        sc.event_confidence = confidence
 
 
 def iter_unclassified_articles(limit: int | None = None) -> list[Article]:

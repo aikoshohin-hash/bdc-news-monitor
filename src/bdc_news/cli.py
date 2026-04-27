@@ -158,6 +158,36 @@ def score(batch: int = typer.Option(0, help="Max rows to score; 0 = all")) -> No
     typer.echo(f"score done: {scored} articles scored")
 
 
+@app.command("tag-events")
+def tag_events(
+    batch: int = typer.Option(0, help="Max rows to process; 0 = all"),
+    retag_all: bool = typer.Option(False, help="Re-tag every relevant article (ignore existing tags)"),
+) -> None:
+    """Apply BDC event taxonomy tags (Issue #1) to relevant articles."""
+    _setup_logging()
+    init_db()
+    from bdc_news.extractors import EventTagger
+    tagger = EventTagger.from_yaml()
+    todo = repo.iter_relevant_articles_for_tagging(
+        limit=batch or None, only_untagged=not retag_all
+    )
+    n_tagged = 0
+    n_with_tags = 0
+    for art in todo:
+        result = tagger.tag(art.title or "", art.snippet or "")
+        repo.save_event_tags(
+            article_id=art.id,
+            tags=result.tags,
+            sub_tags=result.sub_tags,
+            severity=result.severity,
+            confidence=result.confidence,
+        )
+        n_tagged += 1
+        if result.tags:
+            n_with_tags += 1
+    typer.echo(f"tag-events done: processed={n_tagged} with_tags={n_with_tags}")
+
+
 @app.command()
 def prices(start: str = typer.Option(None, help="YYYY-MM-DD; defaults to config")) -> None:
     """Fetch daily close prices for configured tickers via yfinance."""
@@ -180,10 +210,11 @@ def export() -> None:
 
 @app.command("run-all")
 def run_all() -> None:
-    """Collect → classify → score → prices → export."""
+    """Collect → classify → score → tag-events → prices → export."""
     collect()
     classify()
     score()
+    tag_events()
     prices()
     export()
 
