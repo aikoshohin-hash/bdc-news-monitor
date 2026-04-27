@@ -1,0 +1,200 @@
+# BDC / Private Credit domain sentiment overrides (Issue #4).
+#
+# Applied as the FINAL stage of sentiment scoring, on top of the
+# Loughran-McDonald (EN) / hand-curated JP / oseti results. The delta
+# is *added* to the base sentiment score (clamped to [-1.0, +1.0]).
+#
+# The L-M dictionary marks many BDC-specific terms neutral that, in
+# context, carry credit signal. Polarities here reflect that signal
+# (e.g., "amend and extend" is a debt restructuring tell).
+#
+# Schema per rule:
+#   pattern: phrase to match (case-insensitive for EN; literal for JP)
+#   polarity: float in [-1.0, +1.0] — value added to sentiment
+#   lang: "en" | "ja" (default "en")
+#   context_required: optional list of additional keywords that must
+#                     also appear; rule fires only when at least one
+#                     does (e.g., "PIK income" is bearish only when
+#                     paired with "increased"/"rose").
+#   rationale: free-form note (informational; not used by code)
+#
+# Reviews recommended after each BIZD rebalance / major BDC event cycle.
+
+rules:
+  # -------- credit-quality / restructuring (bearish bias) --------
+  - pattern: "amend and extend"
+    polarity: -0.30
+    rationale: "債務再編シグナル。一時的延命だが構造改善ではない"
+
+  - pattern: "covenant lite"
+    polarity: -0.20
+    rationale: "投資家保護薄弱"
+
+  - pattern: "covenant-lite"
+    polarity: -0.20
+    rationale: "covenant lite ハイフン表記"
+
+  - pattern: "second lien"
+    polarity: -0.10
+    rationale: "回収順位劣後"
+
+  - pattern: "placed on non-accrual"
+    polarity: -0.50
+    rationale: "明示的な non-accrual 計上イベント"
+
+  - pattern: "placed on nonaccrual"
+    polarity: -0.50
+    rationale: "non-accrual 連結表記の計上イベント"
+
+  - pattern: "non-accrual"
+    polarity: -0.40
+    rationale: "non-accrual 言及（増加方向の文脈に限定）"
+    context_required: ["rose", "rising", "rise", "increase", "increased", "higher", "ticked up", "jumped", "spike", "climbed", "climbing", "grew", "elevated", "expanding"]
+
+  - pattern: "nonaccrual"
+    polarity: -0.40
+    rationale: "non-accrual 連結表記（増加方向の文脈に限定）"
+    context_required: ["rose", "rising", "rise", "increase", "increased", "higher", "ticked up", "jumped", "spike", "climbed", "climbing", "grew", "elevated", "expanding"]
+
+  - pattern: "non-performing"
+    polarity: -0.30
+    rationale: "信用劣化のシグナル（増加方向の文脈に限定）"
+    context_required: ["rose", "rising", "rise", "increase", "increased", "higher", "ticked up", "jumped", "spike", "climbed", "climbing", "grew", "elevated", "expanding"]
+
+  - pattern: "default rate"
+    polarity: -0.20
+    rationale: "信用環境悪化の示唆"
+
+  - pattern: "writedown"
+    polarity: -0.30
+    rationale: "評価減＝信用劣化の確定"
+
+  - pattern: "write-down"
+    polarity: -0.30
+    rationale: "writedown ハイフン表記"
+
+  - pattern: "mark down"
+    polarity: -0.20
+    rationale: "評価減（軽度）"
+
+  - pattern: "impairment"
+    polarity: -0.30
+    rationale: "減損"
+
+  - pattern: "restructuring"
+    polarity: -0.20
+    rationale: "債務再編。文脈次第だがデフォルトはネガ寄り"
+
+  # -------- capital structure / dilution risk --------
+  - pattern: "rights offering"
+    polarity: -0.40
+    rationale: "希薄化、資本不足の可能性"
+
+  - pattern: "ATM program"
+    polarity: -0.10
+    rationale: "希薄化フロー、規律ある場合は中立"
+
+  - pattern: "secondary offering"
+    polarity: -0.15
+    rationale: "希薄化、ただしBDCでは時価>NAVなら正当化"
+
+  - pattern: "below NAV"
+    polarity: -0.20
+    rationale: "時価<NAV はBDCにとって構造的劣位"
+
+  # -------- positive credit signals --------
+  - pattern: "first lien"
+    polarity: +0.10
+    rationale: "回収順位優位"
+
+  - pattern: "senior secured"
+    polarity: +0.10
+    rationale: "シニア担保付＝回収順位優位"
+
+  - pattern: "supplemental distribution"
+    polarity: +0.30
+    rationale: "余剰収益還元"
+
+  - pattern: "special dividend"
+    polarity: +0.25
+    rationale: "余剰収益還元"
+
+  - pattern: "raises dividend"
+    polarity: +0.30
+    rationale: "増配＝NII余力ある証左"
+
+  - pattern: "increased dividend"
+    polarity: +0.25
+    rationale: "増配同義表現"
+
+  - pattern: "share repurchase"
+    polarity: +0.15
+    rationale: "buyback はNAV近傍でEPS寄与"
+
+  - pattern: "buyback"
+    polarity: +0.15
+    rationale: "share repurchase の口語"
+
+  # -------- contextual: PIK only bearish when growing --------
+  - pattern: "PIK income"
+    polarity: -0.15
+    rationale: "現金収入劣後、増加文脈で信用劣化シグナル"
+    context_required: ["increased", "rose", "growing", "higher", "上昇", "増加", "高まる"]
+
+  - pattern: "PIK"
+    polarity: -0.10
+    rationale: "PIK 増加文脈のみ反応"
+    context_required: ["increased", "rose", "growing", "higher"]
+
+  # -------- ratings / regulator --------
+  - pattern: "downgrade"
+    polarity: -0.40
+    rationale: "格下げ"
+
+  - pattern: "negative outlook"
+    polarity: -0.20
+    rationale: "見通しネガティブ"
+
+  - pattern: "upgrade"
+    polarity: +0.30
+    rationale: "格上げ"
+
+  - pattern: "positive outlook"
+    polarity: +0.15
+    rationale: "見通しポジ"
+
+  # -------- Japanese --------
+  - pattern: "格下げ"
+    polarity: -0.50
+    lang: ja
+    rationale: "格下げ"
+
+  - pattern: "格上げ"
+    polarity: +0.40
+    lang: ja
+    rationale: "格上げ"
+
+  - pattern: "減損"
+    polarity: -0.35
+    lang: ja
+    rationale: "減損損失"
+
+  - pattern: "増配"
+    polarity: +0.30
+    lang: ja
+    rationale: "増配"
+
+  - pattern: "減配"
+    polarity: -0.40
+    lang: ja
+    rationale: "減配"
+
+  - pattern: "債務再編"
+    polarity: -0.30
+    lang: ja
+    rationale: "リストラクチャリング"
+
+  - pattern: "プライベートクレジット"
+    polarity: 0.0
+    lang: ja
+    rationale: "中立タグ用（キーワード一致を阻害しないためのアンカー）"

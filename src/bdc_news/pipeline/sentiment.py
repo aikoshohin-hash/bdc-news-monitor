@@ -15,13 +15,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from bdc_news.paths import LEXICON_DIR
+from bdc_news.pipeline.bdc_overrides import BdcOverrideOverlay
 
 log = logging.getLogger(__name__)
 
 
 @dataclass
 class Score:
-    sentiment: float  # -1.0 .. +1.0
+    sentiment: float  # -1.0 .. +1.0 (after BDC overlay)
     label: str  # positive / neutral / negative
     confidence: float  # 0.0 .. 1.0
     pos_hits: int
@@ -29,6 +30,12 @@ class Score:
     unc_hits: int
     override_applied: bool
     model: str
+    # Issue #4: BDC domain overlay — base score before adjustment, the
+    # delta the overlay added, and which rules fired. Stored alongside
+    # the final score for transparency and back-testing.
+    sentiment_pre_bdc: float | None = None
+    bdc_override_delta: float = 0.0
+    bdc_overrides_applied: tuple[str, ...] = ()
 
 
 POS = {"positive"}
@@ -78,12 +85,15 @@ class SentimentScorer:
             self._oseti = oseti.Analyzer()
         except Exception:  # noqa: BLE001
             self._oseti = None
+        # Issue #4: BDC domain overlay (final-stage polarity adjustment)
+        self.bdc_overlay = BdcOverrideOverlay.from_yaml()
         log.info(
-            "SentimentScorer loaded: EN=%d, JA=%d, overrides=%d, oseti=%s",
+            "SentimentScorer loaded: EN=%d, JA=%d, overrides=%d, oseti=%s, bdc_overlay=%d",
             len(self.en_lex),
             len(self.ja_lex),
             len(self.overrides),
             bool(self._oseti),
+            len(self.bdc_overlay.rules),
         )
 
     # ----------------------------------------------------------------- English
@@ -198,6 +208,25 @@ class SentimentScorer:
                 model=sc.model,
                 override=True,
             )
+
+        # Issue #4: BDC domain overlay (final-stage polarity adjustment).
+        overlay = self.bdc_overlay.apply(sc.sentiment, text, language=lang)
+        if overlay.fired:
+            sc = Score(
+                sentiment=overlay.new_sentiment,
+                label=_label_for(overlay.new_sentiment, sc.pos_hits + sc.neg_hits),
+                confidence=sc.confidence,
+                pos_hits=sc.pos_hits,
+                neg_hits=sc.neg_hits,
+                unc_hits=sc.unc_hits,
+                override_applied=sc.override_applied,
+                model=sc.model + "+bdc",
+                sentiment_pre_bdc=sc.sentiment,
+                bdc_override_delta=overlay.delta,
+                bdc_overrides_applied=tuple(overlay.fired),
+            )
+        else:
+            sc.sentiment_pre_bdc = sc.sentiment
         return sc
 
     # --------------------------------------------------------------- Internals
@@ -243,3 +272,13 @@ def _estimate_tokens(text: str, lang: str) -> int:
     if lang.startswith("ja"):
         return max(1, len(text) // 2)
     return len(_EN_TOKEN.findall(text or ""))
+
+
+def _label_for(sentiment: float, total_hits: int) -> str:
+    if total_hits == 0 and abs(sentiment) <= 0.001:
+        return "neutral"
+    if sentiment > 0.2:
+        return "positive"
+    if sentiment < -0.2:
+        return "negative"
+    return "neutral"
