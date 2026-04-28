@@ -1,0 +1,84 @@
+# Alert rules — evaluated daily after pipeline completes.
+# Each rule fires at most once per 24h (cooldown).
+#
+# Supported conditions:
+#   sent_below:     ticker daily sentiment mean < threshold
+#   sent_above:     ticker daily sentiment mean > threshold
+#   article_spike:  ticker article count in window exceeds N × historical avg
+#   event_match:    any article tagged with specified event type(s)
+#   zscore_below:   peer-relative z-score < threshold
+#   zscore_above:   peer-relative z-score > threshold
+
+rules:
+  - id: negative_sentiment_spike
+    description: "Sentiment drops sharply negative for any BDC"
+    condition: sent_below
+    threshold: -0.4
+    window_days: 1
+    scope: active_tickers
+    severity: high
+    channels: [slack]
+
+  - id: positive_sentiment_spike
+    description: "Sentiment spikes positive for any BDC"
+    condition: sent_above
+    threshold: 0.5
+    window_days: 1
+    scope: active_tickers
+    severity: low
+    channels: [slack]
+
+  - id: article_volume_spike
+    description: "Article count exceeds 3× rolling 30d average"
+    condition: article_spike
+    multiplier: 3.0
+    baseline_days: 30
+    scope: active_tickers
+    severity: medium
+    channels: [slack]
+
+  - id: earnings_event
+    description: "Earnings / financial results published"
+    condition: event_match
+    event_types: [earnings_results]
+    scope: active_tickers
+    severity: medium
+    channels: [slack]
+
+  - id: credit_event
+    description: "Credit quality / non-accrual event detected"
+    condition: event_match
+    event_types: [credit_quality]
+    scope: active_tickers
+    severity: high
+    channels: [slack]
+
+  - id: peer_relative_low
+    description: "Peer-relative sentiment z-score below -2σ"
+    condition: zscore_below
+    threshold: -2.0
+    window_days: 7
+    scope: active_tickers
+    severity: high
+    channels: [slack]
+
+  - id: peer_relative_high
+    description: "Peer-relative sentiment z-score above +2σ"
+    condition: zscore_above
+    threshold: 2.0
+    window_days: 7
+    scope: active_tickers
+    severity: low
+    channels: [slack]
+
+# Notification channels
+channels:
+  slack:
+    webhook_env: "SLACK_WEBHOOK_URL"
+  email:
+    smtp_host_env: "SMTP_HOST"
+    smtp_port: 587
+    from_env: "ALERT_FROM_EMAIL"
+    to_env: "ALERT_TO_EMAIL"
+
+cooldown_hours: 24

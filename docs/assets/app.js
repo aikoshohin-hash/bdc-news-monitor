@@ -10,6 +10,8 @@
     meta: {},
     articleCursor: 50,
     activeTicker: null,
+    watchlist: new Set(),
+    wlFilterActive: false,
   };
 
   const plotlyConfig = { displayModeBar: false, responsive: true };
@@ -27,8 +29,10 @@
   document.addEventListener("DOMContentLoaded", init);
 
   async function init() {
+    loadWatchlist();
     wireTabs();
     wireControls();
+    wireWatchlist();
     try {
       await Promise.all([
         loadJSON("data/daily_index.json").then((d) => (state.daily = (d && d.items) || [])),
@@ -77,12 +81,13 @@
         document.getElementById(`tab-${id}`).classList.add("active");
         if (id === "entities") renderEntities();
         if (id === "articles") renderArticles();
+        if (id === "heatmap") renderHeatmap();
       });
     });
   }
 
   function wireControls() {
-    ["range-select", "region-select", "freq-select"].forEach((id) =>
+    ["range-select", "region-select", "freq-select", "sent-mode"].forEach((id) =>
       document.getElementById(id).addEventListener("change", renderOverviewCharts)
     );
     ["price-symbol", "news-metric", "rebase-chk"].forEach((id) =>
@@ -102,6 +107,119 @@
       state.articleCursor += 50;
       renderArticles();
     });
+    document.getElementById("entity-wl-only").addEventListener("change", renderEntities);
+    // Heatmap controls
+    document.getElementById("heatmap-range").addEventListener("change", renderHeatmap);
+    document.getElementById("heatmap-mode").addEventListener("change", renderHeatmap);
+    document.getElementById("heatmap-export").addEventListener("click", () => {
+      Plotly.downloadImage("chart-heatmap", { format: "png", width: 1400, height: 600, filename: "bdc_heatmap" });
+    });
+  }
+
+  // =========================================================================
+  // Issue #5 — Watchlist (localStorage)
+  // =========================================================================
+  const WL_KEY = "bdc_watchlist";
+
+  function loadWatchlist() {
+    try {
+      const raw = localStorage.getItem(WL_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) arr.forEach((s) => state.watchlist.add(s));
+      }
+    } catch (_) { /* ignore */ }
+  }
+
+  function saveWatchlist() {
+    localStorage.setItem(WL_KEY, JSON.stringify([...state.watchlist]));
+  }
+
+  function wireWatchlist() {
+    const btn = document.getElementById("watchlist-btn");
+    const modal = document.getElementById("watchlist-modal");
+    const closeBtn = document.getElementById("watchlist-close");
+    btn.addEventListener("click", () => {
+      renderWatchlistGrid();
+      modal.hidden = false;
+    });
+    closeBtn.addEventListener("click", () => (modal.hidden = true));
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.hidden = true;
+    });
+    document.getElementById("wl-export").addEventListener("click", exportWatchlist);
+    document.getElementById("wl-import").addEventListener("click", importWatchlist);
+    document.getElementById("wl-filter-chk").addEventListener("change", (e) => {
+      state.wlFilterActive = e.target.checked;
+      renderAll();
+    });
+  }
+
+  function renderWatchlistGrid() {
+    const grid = document.getElementById("watchlist-grid");
+    const tickers = state.entities.map((e) => e.symbol).sort();
+    if (!tickers.length) {
+      grid.innerHTML = '<span style="color:var(--muted);font-size:12px">エンティティデータ未読み込み</span>';
+      return;
+    }
+    grid.innerHTML = tickers
+      .map((t) => {
+        const sel = state.watchlist.has(t) ? "selected" : "";
+        return `<div class="wl-chip ${sel}" data-sym="${t}">${t}</div>`;
+      })
+      .join("");
+    grid.querySelectorAll(".wl-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const sym = chip.dataset.sym;
+        if (state.watchlist.has(sym)) {
+          state.watchlist.delete(sym);
+          chip.classList.remove("selected");
+        } else {
+          state.watchlist.add(sym);
+          chip.classList.add("selected");
+        }
+        saveWatchlist();
+      });
+    });
+  }
+
+  function exportWatchlist() {
+    const blob = new Blob([JSON.stringify([...state.watchlist], null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "bdc_watchlist.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function importWatchlist() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.addEventListener("change", () => {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const arr = JSON.parse(reader.result);
+          if (Array.isArray(arr)) {
+            state.watchlist.clear();
+            arr.forEach((s) => state.watchlist.add(String(s)));
+            saveWatchlist();
+            renderWatchlistGrid();
+          }
+        } catch (_) {
+          alert("JSONの読み込みに失敗しました");
+        }
+      };
+      reader.readAsText(file);
+    });
+    input.click();
+  }
+
+  function isInWatchlist(ticker) {
+    return state.watchlist.size === 0 || !state.wlFilterActive || state.watchlist.has(ticker);
   }
 
   // ----------------------------------------------------------------- header
@@ -165,6 +283,66 @@
     renderOverlayChart();
   }
 
+  // =========================================================================
+  // Issue #8 — Peer-relative sentiment (z-score)
+  // =========================================================================
+  function computePeerRelative(dailyRows) {
+    const byDate = new Map();
+    for (const r of state.daily) {
+      if (r.region !== "all") continue;
+      const key = r.date;
+      if (!byDate.has(key)) byDate.set(key, []);
+      byDate.get(key).push(r);
+    }
+    return dailyRows.map((r) => {
+      const peers = byDate.get(r.date) || [];
+      if (peers.length < 2) return { ...r, sent_weighted: 0 };
+      const vals = peers.map((p) => p.sent_weighted || 0);
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const std = Math.sqrt(vals.reduce((a, v) => a + (v - mean) ** 2, 0) / vals.length) || 1;
+      return { ...r, sent_weighted: (r.sent_weighted - mean) / std };
+    });
+  }
+
+  function computeEntityPeerRelative(articles, ticker) {
+    const bdcTickers = state.entities.map((e) => e.symbol);
+    const byDate = new Map();
+    for (const a of state.articles) {
+      if (a.sentiment == null || !a.published_at) continue;
+      const d = a.published_at.slice(0, 10);
+      for (const t of bdcTickers) {
+        if (!mentionsTicker(a, t)) continue;
+        if (!byDate.has(d)) byDate.set(d, new Map());
+        const dm = byDate.get(d);
+        if (!dm.has(t)) dm.set(t, { sum: 0, n: 0 });
+        const b = dm.get(t);
+        b.sum += a.sentiment;
+        b.n += 1;
+      }
+    }
+    const result = [];
+    for (const [date, dm] of byDate) {
+      if (!dm.has(ticker)) continue;
+      const vals = [...dm.values()].filter((v) => v.n > 0).map((v) => v.sum / v.n);
+      if (vals.length < 2) continue;
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const std = Math.sqrt(vals.reduce((a, v) => a + (v - mean) ** 2, 0) / vals.length) || 1;
+      const tickerMean = dm.get(ticker).sum / dm.get(ticker).n;
+      result.push({ date, sent: (tickerMean - mean) / std });
+    }
+    return result.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  function ma(arr, window) {
+    const out = [];
+    for (let i = 0; i < arr.length; i++) {
+      const start = Math.max(0, i - window + 1);
+      const slice = arr.slice(start, i + 1);
+      out.push(slice.reduce((a, b) => a + b, 0) / slice.length);
+    }
+    return out;
+  }
+
   // ------------------------------------------------------- filter helpers
   function filteredDaily() {
     const range = document.getElementById("range-select").value;
@@ -174,8 +352,10 @@
     let rows = state.daily.filter((r) => r.region === region);
     if (cutoff) rows = rows.filter((r) => r.date >= cutoff);
     rows.sort((a, b) => a.date.localeCompare(b.date));
-    if (freq === "D") return rows;
-    return rollup(rows, freq);
+    if (freq !== "D") rows = rollup(rows, freq);
+    const mode = document.getElementById("sent-mode").value;
+    if (mode === "peer_relative") rows = computePeerRelative(rows);
+    return rows;
   }
 
   function rangeCutoff(range) {
@@ -216,7 +396,6 @@
 
   function weekKey(dateStr) {
     const d = new Date(dateStr);
-    // ISO week Monday
     const day = (d.getUTCDay() + 6) % 7;
     d.setUTCDate(d.getUTCDate() - day);
     return d.toISOString().slice(0, 10);
@@ -226,6 +405,7 @@
   function renderOverviewCharts() {
     const rows = filteredDaily();
     const x = rows.map((r) => r.date);
+    const isPeerRel = document.getElementById("sent-mode").value === "peer_relative";
     Plotly.newPlot(
       "chart-counts",
       [
@@ -249,17 +429,23 @@
       [
         {
           x,
-          y: rows.map((r) => r.sent_weighted),
+          y: isPeerRel ? ma(rows.map((r) => r.sent_weighted), 30) : rows.map((r) => r.sent_weighted),
           type: "scatter",
           mode: "lines+markers",
           line: { color: "#e6edf3", width: 2 },
           marker: { size: 4 },
-          name: "センチメント指数",
+          name: isPeerRel ? "z-score (30d MA)" : "センチメント指数",
         },
       ],
       {
         ...plotlyLayoutBase,
-        yaxis: { ...plotlyLayoutBase.yaxis, title: "index", range: [-1, 1], zeroline: true, zerolinecolor: "#444" },
+        yaxis: {
+          ...plotlyLayoutBase.yaxis,
+          title: isPeerRel ? "z-score" : "index",
+          range: isPeerRel ? [-3, 3] : [-1, 1],
+          zeroline: true,
+          zerolinecolor: "#444",
+        },
       },
       plotlyConfig
     );
@@ -356,15 +542,114 @@
     Plotly.newPlot("chart-overlay", traces, layout, plotlyConfig);
   }
 
+  // =========================================================================
+  // Issue #7 — Heatmap (BDC × date sentiment matrix)
+  // =========================================================================
+  function renderHeatmap() {
+    const rangeDays = parseInt(document.getElementById("heatmap-range").value) || 180;
+    const mode = document.getElementById("heatmap-mode").value;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - rangeDays);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+    const bdcTickers = state.entities
+      .filter((e) => e.n > 0)
+      .sort((a, b) => b.n - a.n)
+      .map((e) => e.symbol);
+    if (!bdcTickers.length) {
+      document.getElementById("chart-heatmap").innerHTML =
+        '<p style="padding:24px;color:var(--muted);font-size:12px">エンティティデータなし</p>';
+      return;
+    }
+
+    const byTickerDate = new Map();
+    for (const a of state.articles) {
+      if (!a.published_at || a.sentiment == null) continue;
+      const d = a.published_at.slice(0, 10);
+      if (d < cutoffStr) continue;
+      for (const t of bdcTickers) {
+        if (!mentionsTicker(a, t)) continue;
+        const key = `${t}|${d}`;
+        if (!byTickerDate.has(key)) byTickerDate.set(key, { sum: 0, n: 0 });
+        const b = byTickerDate.get(key);
+        b.sum += a.sentiment;
+        b.n += 1;
+      }
+    }
+
+    const dates = [...new Set([...byTickerDate.keys()].map((k) => k.split("|")[1]))].sort();
+    const z = [];
+    for (const ticker of bdcTickers) {
+      const row = dates.map((d) => {
+        const b = byTickerDate.get(`${ticker}|${d}`);
+        return b ? b.sum / b.n : null;
+      });
+      z.push(row);
+    }
+
+    if (mode === "peer_relative") {
+      for (let j = 0; j < dates.length; j++) {
+        const col = z.map((row) => row[j]).filter((v) => v !== null);
+        if (col.length < 2) continue;
+        const mean = col.reduce((a, b) => a + b, 0) / col.length;
+        const std = Math.sqrt(col.reduce((a, v) => a + (v - mean) ** 2, 0) / col.length) || 1;
+        for (let i = 0; i < z.length; i++) {
+          if (z[i][j] !== null) z[i][j] = (z[i][j] - mean) / std;
+        }
+      }
+    }
+
+    const zmin = mode === "peer_relative" ? -2.5 : -1;
+    const zmax = mode === "peer_relative" ? 2.5 : 1;
+
+    Plotly.newPlot(
+      "chart-heatmap",
+      [
+        {
+          type: "heatmap",
+          x: dates,
+          y: bdcTickers,
+          z,
+          zmin,
+          zmax,
+          colorscale: [
+            [0, "#d73027"],
+            [0.25, "#fc8d59"],
+            [0.5, "#ffffbf"],
+            [0.75, "#91bfdb"],
+            [1, "#4575b4"],
+          ],
+          colorbar: {
+            title: mode === "peer_relative" ? "z-score" : "sentiment",
+            titleside: "right",
+          },
+          hoverongaps: false,
+          hovertemplate: "%{y} | %{x}<br>%{z:.3f}<extra></extra>",
+        },
+      ],
+      {
+        ...plotlyLayoutBase,
+        yaxis: { ...plotlyLayoutBase.yaxis, autorange: "reversed", automargin: true },
+        margin: { l: 64, r: 24, t: 12, b: 48 },
+      },
+      plotlyConfig
+    );
+  }
+
   // -------------------------------------------------------------- entities
   function renderEntities() {
     const host = document.getElementById("entities-table");
-    if (!state.entities.length) {
+    const wlOnly = document.getElementById("entity-wl-only").checked;
+    let ents = state.entities.slice();
+    if (wlOnly && state.watchlist.size > 0) {
+      ents = ents.filter((e) => state.watchlist.has(e.symbol));
+    }
+    if (!ents.length) {
       host.innerHTML = "<p>エンティティデータが未生成です。</p>";
       Plotly.purge("entities-chart");
       return;
     }
-    const rows = state.entities
+    const rows = ents
       .map(
         (e) => `
         <tr>
@@ -383,8 +668,7 @@
         <tbody>${rows}</tbody>
       </table>`;
 
-    // Monthly heatmap for top N entities
-    const top = state.entities.slice(0, 12);
+    const top = ents.slice(0, 12);
     const months = [
       ...new Set(top.flatMap((e) => e.by_month.map((m) => m.month))),
     ].sort();
@@ -530,7 +814,6 @@
     window.scrollTo({ top: 0 });
   }
 
-  // ------------------------------------ price + day-change in header
   function renderEntityPriceMeta(ticker) {
     const series = (state.prices.series || {})[ticker] || [];
     const priceEl = document.getElementById("entity-price");
@@ -549,7 +832,6 @@
     chgEl.className = chg >= 0 ? "pos" : "neg";
   }
 
-  // ------------------------------------ KPI cards from quarterly metrics
   function renderEntityKPIs(ticker) {
     const series = ((state.quarterly.series || {})[ticker] || []).slice();
     series.sort((a, b) => (a.fiscal_period > b.fiscal_period ? 1 : -1));
@@ -593,7 +875,6 @@
     d.className = "kpi-delta " + (diff >= 0 ? "pos" : "neg");
   }
 
-  // ------------------------------------ overlay chart (price + sentiment)
   function renderEntityOverlay(ticker) {
     const priceSeries = (state.prices.series || {})[ticker] || [];
     const articleHits = state.articles.filter((a) => mentionsTicker(a, ticker));
@@ -643,7 +924,6 @@
     Plotly.newPlot("entity-chart-overlay", traces, layout, plotlyConfig);
   }
 
-  // ------------------------------------ event timeline (lanes per category)
   function renderEntityEventTimeline(ticker) {
     const hits = state.articles.filter((a) => mentionsTicker(a, ticker) && (a.event_tags || []).length);
     if (!hits.length) {
@@ -690,7 +970,6 @@
     );
   }
 
-  // ------------------------------------ quarterly metrics table
   function renderEntityMetricsTable(ticker) {
     const series = ((state.quarterly.series || {})[ticker] || []).slice();
     if (!series.length) {
@@ -727,7 +1006,6 @@
       </table>`;
   }
 
-  // ------------------------------------ recent articles for the ticker
   function renderEntityArticles(ticker) {
     const hits = state.articles
       .filter((a) => mentionsTicker(a, ticker))
@@ -758,7 +1036,6 @@
       </table>`;
   }
 
-  // ------------------------------------ peer comparison table
   function renderEntityPeers(ticker) {
     const sortedPeers = state.entities.slice().sort((a, b) => b.n - a.n);
     const focus = state.entities.find((e) => e.symbol === ticker);
@@ -792,7 +1069,6 @@
       </table>`;
   }
 
-  // ------------------------------------ helper: ticker mention test
   function mentionsTicker(article, ticker) {
     const blob = `${article.title || ""} ${article.snippet || ""}`.toLowerCase();
     if (blob.includes(ticker.toLowerCase())) return true;

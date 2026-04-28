@@ -247,9 +247,31 @@ def export() -> None:
     typer.echo(f"export done: {stats}")
 
 
+@app.command("check-alerts")
+def check_alerts(
+    dry_run: bool = typer.Option(False, help="Evaluate rules but do not send notifications"),
+) -> None:
+    """Issue #6: evaluate alert rules and dispatch notifications."""
+    _setup_logging()
+    init_db()
+    from bdc_news.alerts.evaluator import evaluate
+    from bdc_news.alerts.notifier import send_all
+    alerts = evaluate()
+    if not alerts:
+        typer.echo("check-alerts: no alerts fired")
+        return
+    for a in alerts:
+        typer.echo(f"  [{a.severity}] {a.ticker}: {a.message}")
+    if dry_run:
+        typer.echo(f"check-alerts dry-run: {len(alerts)} alerts (not sent)")
+        return
+    sent = send_all(alerts)
+    typer.echo(f"check-alerts done: {len(alerts)} alerts, {sent} notifications sent")
+
+
 @app.command("run-all")
 def run_all() -> None:
-    """Collect → classify → score → tag-events → edgar-metrics → prices → export."""
+    """Collect → classify → score → tag-events → edgar-metrics → prices → export → alerts."""
     collect()
     classify()
     score()
@@ -257,6 +279,7 @@ def run_all() -> None:
     edgar_metrics()
     prices()
     export()
+    check_alerts(dry_run=False)
 
 
 @app.command("update-lexicon-lm")

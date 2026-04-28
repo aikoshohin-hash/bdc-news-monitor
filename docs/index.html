@@ -13,14 +13,38 @@
   <div class="meta">
     <span id="updated">更新日時: —</span>
     <span id="article-count">記事数: —</span>
+    <button id="watchlist-btn" class="watchlist-btn" title="Watchlist">★ Watchlist</button>
   </div>
   <nav class="tabs">
     <button class="tab active" data-tab="overview">Overview</button>
     <button class="tab" data-tab="entities">By Entity</button>
+    <button class="tab" data-tab="heatmap">Heatmap</button>
     <button class="tab" data-tab="articles">Articles</button>
     <button class="tab" data-tab="about">About</button>
   </nav>
 </header>
+
+<!-- Issue #5: Watchlist modal -->
+<div id="watchlist-modal" class="modal-overlay" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Watchlist</h3>
+      <button id="watchlist-close" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="muted" style="font-size:12px">銘柄をクリックして追加・削除。localStorage に保存（サーバー不要）</p>
+      <div id="watchlist-grid" class="watchlist-grid"></div>
+      <hr style="border-color:var(--card-border);margin:12px 0">
+      <div style="display:flex;gap:8px;font-size:11px">
+        <button id="wl-export" class="btn-small">エクスポート (JSON)</button>
+        <button id="wl-import" class="btn-small">インポート</button>
+        <label style="display:flex;align-items:center;gap:4px;color:var(--muted)">
+          <input type="checkbox" id="wl-filter-chk" /> Watchlist のみ表示
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="entity-detail" class="entity-detail" hidden>
   <a href="#" id="entity-back" class="entity-back">← Overview に戻る</a>
@@ -75,6 +99,12 @@
           <option value="M">月次</option>
         </select>
       </label>
+      <label>センチメント
+        <select id="sent-mode">
+          <option value="absolute" selected>絶対値</option>
+          <option value="peer_relative">ピア相対 (z-score)</option>
+        </select>
+      </label>
     </div>
 
     <div class="grid">
@@ -103,8 +133,35 @@
 
   <!-- ---------- Entities tab ---------- -->
   <section id="tab-entities" class="tab-panel">
+    <div class="controls inline">
+      <label><input type="checkbox" id="entity-wl-only" /> Watchlist のみ</label>
+    </div>
     <div id="entities-table"></div>
     <div id="entities-chart" class="chart tall"></div>
+  </section>
+
+  <!-- ---------- Heatmap tab (Issue #7) ---------- -->
+  <section id="tab-heatmap" class="tab-panel">
+    <div class="controls">
+      <label>期間
+        <select id="heatmap-range">
+          <option value="90">90日</option>
+          <option value="180" selected>180日</option>
+          <option value="365">365日</option>
+        </select>
+      </label>
+      <label>センチメント
+        <select id="heatmap-mode">
+          <option value="absolute" selected>絶対値</option>
+          <option value="peer_relative">ピア相対</option>
+        </select>
+      </label>
+      <button id="heatmap-export" class="btn-small">PNG保存</button>
+    </div>
+    <div class="card wide">
+      <h3>BDC × 日付 センチメント・ヒートマップ</h3>
+      <div id="chart-heatmap" class="chart" style="height:500px"></div>
+    </div>
   </section>
 
   <!-- ---------- Articles tab ---------- -->
@@ -144,10 +201,12 @@
       <li><b>対象</b>: プライベートクレジット／BDC（Business Development Company）に関する国内外のニュース</li>
       <li><b>期間</b>: 2024-01-01〜現在（GitHub Actions 毎日 07:00 JST 更新）</li>
       <li><b>関連性判定</b>: MUST/SHOULD/EXCLUDE の 3 層キーワードゲート（<code>config/keywords.yaml</code>）</li>
-      <li><b>センチメント</b>: <b>完全オフライン</b> — 英語は Loughran-McDonald 金融極性辞書、日本語は独自辞書＋oseti、フレーズ単位ドメイン・オーバーライド。さらに <b>BDC ドメイン辞書オーバーレイ</b>（<code>config/sentiment_overrides_bdc.yaml</code>、Issue #4）を最終段で適用し、L-M が中立扱いする BDC 固有用語（"amend and extend"、"covenant lite"、"placed on non-accrual" 等）に重みを与える。外部 API は使用しない</li>
-      <li><b>株価</b>: yfinance（Yahoo Finance）からの日次終値。BIZD 構成上位 12 社＋ベンチマーク（BIZD, ^GSPC, HYG）</li>
-      <li><b>四半期メトリクス</b>: SEC EDGAR XBRL companyfacts API（無償・無認証）から NAV/share、総投資額（時価）、NII/share、配当/株、Asset Coverage 等を抽出。<code>data/edgar_cache/</code> にレスポンスをキャッシュし再現性を確保（Issue #2）</li>
-      <li><b>重ね描き</b>: 2024-01-01 を 100 とした指数化切替、20d/60d 移動平均オーバーレイ</li>
+      <li><b>センチメント</b>: <b>完全オフライン</b> — 英語は Loughran-McDonald 金融極性辞書、日本語は独自辞書＋oseti、フレーズ単位ドメイン・オーバーライド＋BDCドメイン辞書オーバーレイ（<code>config/sentiment_overrides_bdc.yaml</code>）。スコアは <code>tanh((pos-neg)/tokens × 6)</code> のS字カーブで [-1, +1] の連続値。外部 API は使用しない</li>
+      <li><b>ピア相対センチメント (Issue #8)</b>: <code>z = (ticker_sent - peer_mean) / peer_std</code> を30日移動平均で平滑化。ピア集合 = BIZD 上位13社</li>
+      <li><b>株価</b>: yfinance（Yahoo Finance）からの日次終値。BIZD 構成上位 13 社＋ベンチマーク（BIZD, ^GSPC, HYG）</li>
+      <li><b>四半期メトリクス</b>: SEC EDGAR XBRL companyfacts API（無償・無認証）から NAV/share、総投資額（時価）、NII/share、配当/株、Asset Coverage 等を抽出</li>
+      <li><b>ヒートマップ (Issue #7)</b>: BDC × 日付のセルに日次センチメント平均を colorblind-safe diverging パレットで表示。過去90/180/365日切替</li>
+      <li><b>アラート (Issue #6)</b>: <code>config/alert_rules.yaml</code> に定義されたルールに基づき、GitHub Actions の日次バッチ最終段で条件評価 → Slack webhook / Email 通知。24時間クールダウン</li>
     </ul>
     <h2>データソース</h2>
     <ul>

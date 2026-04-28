@@ -65,6 +65,11 @@ jobs:
       - name: Export
         run: bdc-news export
 
+      - name: Check alerts
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: bdc-news check-alerts || true
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
