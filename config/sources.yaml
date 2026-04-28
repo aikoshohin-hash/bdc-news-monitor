@@ -1,10 +1,14 @@
 # News sources.
 # Types: google_news | rss | gdelt | sec_edgar
+#
+# Updated 2026-04: expanded queries for new tickers (CSWC, TRIN, OTF, OCSL)
+# and added RSS feeds for broader coverage.
 
 google_news:
   # Google News RSS search — multiple queries to broaden coverage.
   # hl=language, gl=country, ceid=country:language
   queries_en:
+    # Broad industry terms
     - q: "\"private credit\" OR \"direct lending\" OR \"private debt\""
       hl: "en-US"
       gl: "US"
@@ -13,11 +17,38 @@ google_news:
       hl: "en-US"
       gl: "US"
       ceid: "US:en"
+    # Top BDCs by name — earnings / results
     - q: "(ARCC OR BXSL OR OBDC OR FSK OR MAIN) earnings"
       hl: "en-US"
       gl: "US"
       ceid: "US:en"
+    - q: "(HTGC OR GBDC OR TSLX OR CSWC OR TRIN) earnings"
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    - q: "(OCSL OR PSEC OR OTF) earnings OR dividend"
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    # Specific BDC names for broader pickup
+    - q: "\"Ares Capital\" OR \"Main Street Capital\" OR \"Hercules Capital\""
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    - q: "\"Blackstone Secured Lending\" OR \"Blue Owl\" OR \"Golub Capital\""
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    - q: "\"Capital Southwest\" OR \"Trinity Capital\" OR \"Sixth Street\""
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    # Credit quality signals
     - q: "\"non-accrual\" OR \"covenant-lite\" OR \"leveraged loan\""
+      hl: "en-US"
+      gl: "US"
+      ceid: "US:en"
+    - q: "\"middle market\" lending OR loan"
       hl: "en-US"
       gl: "US"
       ceid: "US:en"
@@ -34,6 +65,10 @@ google_news:
       hl: "ja"
       gl: "JP"
       ceid: "JP:ja"
+    - q: "プライベートクレジット 市場 OR ファンド"
+      hl: "ja"
+      gl: "JP"
+      ceid: "JP:ja"
 
 rss:
   # Direct RSS feeds (public, free)
@@ -47,10 +82,35 @@ rss:
     url: "https://www.reutersagency.com/feed/?best-sectors=business-finance&post_type=best"
     language: en
     weight: 0.9
-  # Placeholder / often rate-limited — user may add/remove as needed
   - id: pdi_news
     name: "Private Debt Investor"
     url: "https://www.privatedebtinvestor.com/feed/"
+    language: en
+    weight: 1.0
+  - id: bdc_reporter
+    name: "BDC Reporter"
+    url: "https://bdcreporter.com/feed/"
+    language: en
+    weight: 1.0
+  - id: leveraged_loan_news
+    name: "Leveraged Loan — LCD"
+    url: "https://www.leveragedloan.com/feed/"
+    language: en
+    weight: 0.8
+  - id: middle_market_growth
+    name: "Middle Market Growth"
+    url: "https://middlemarketgrowth.org/feed/"
+    language: en
+    weight: 0.7
+  # BDC company IR press releases (free)
+  - id: arcc_ir
+    name: "Ares Capital IR"
+    url: "https://www.arescapitalcorp.com/rss/news-releases.xml"
+    language: en
+    weight: 1.0
+  - id: main_ir
+    name: "Main Street Capital IR"
+    url: "https://ir.mainstcapital.com/rss/news-releases.xml"
     language: en
     weight: 1.0
 
@@ -62,7 +122,9 @@ gdelt:
     - "\"private credit\""
     - "\"direct lending\""
     - "\"business development company\""
-  maxrecords: 100
+    - "\"middle market lending\""
+    - "\"leveraged loan\""
+  maxrecords: 250
   timespan: "24h"   # only used on incremental pulls; full backfill uses date range
 
 sec_edgar:
@@ -73,4 +135,18 @@ sec_edgar:
     - "10-K"
     - "10-Q"
     - "8-K"
-  ciks: []  # populate with CIKs of target BDCs over time
+  # CIK list for targeted BDC filings (top 13 active + legacy)
+  ciks:
+    - "0001287750"  # ARCC
+    - "0001655888"  # OBDC
+    - "0001422183"  # FSK
+    - "0001736035"  # BXSL
+    - "0001396440"  # MAIN
+    - "0001894057"  # OTF
+    - "0001280776"  # HTGC
+    - "0001476765"  # GBDC
+    - "0001508655"  # TSLX
+    - "0000017313"  # CSWC
+    - "0001852590"  # TRIN
+    - "0001414932"  # OCSL
+    - "0001287032"  # PSEC

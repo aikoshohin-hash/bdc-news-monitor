@@ -5,14 +5,19 @@
 
 ciks:
   ARCC: "0001287750"   # Ares Capital
+  OBDC: "0001655888"   # Blue Owl Capital Corp
   FSK:  "0001422183"   # FS KKR Capital
   BXSL: "0001736035"   # Blackstone Secured Lending
-  OBDC: "0001655888"   # Blue Owl Capital Corp
   MAIN: "0001396440"   # Main Street Capital
+  OTF:  "0001894057"   # Blue Owl Technology Finance
   HTGC: "0001280776"   # Hercules Capital
   GBDC: "0001476765"   # Golub Capital BDC
-  BBDC: "0001379785"   # Barings BDC
-  PSEC: "0001287032"   # Prospect Capital
   TSLX: "0001508655"   # Sixth Street Specialty Lending
+  CSWC: "0000017313"   # Capital Southwest
+  TRIN: "0001852590"   # Trinity Capital
+  OCSL: "0001414932"   # Oaktree Specialty Lending
+  PSEC: "0001287032"   # Prospect Capital
+  # Legacy (still resolvable for historical data)
+  BBDC: "0001379785"   # Barings BDC
   NMFC: "0001496099"   # New Mountain Finance
   CGBD: "0001544206"   # Carlyle Secured Lending

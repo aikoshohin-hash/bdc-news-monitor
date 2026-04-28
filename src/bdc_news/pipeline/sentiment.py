@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import math
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -242,19 +243,30 @@ class SentimentScorer:
         model: str,
         override: bool = False,
     ) -> Score:
+        # --- tanh-smoothed scoring ---
+        # Old formula: (pos-neg)/(pos+neg) produced discrete ratios like
+        # 0.0, ±0.33, ±0.5, ±1.0 — no granularity.
+        #
+        # New: normalise by TOTAL tokens (not just polar ones) so that
+        # "3 pos hits in a 50-word snippet" and "3 pos hits in a 10-word
+        # title" yield different scores. Then pass through tanh for a
+        # smooth S-curve in [-1, 1].
+        #
+        #   raw = (pos - neg) / tokens_n        direction + density
+        #   sentiment = tanh(raw * SCALE)        S-curve [-1, 1]
+        #
+        # SCALE = 6 → 3 net-pos in 20 tokens  ≈ tanh(0.9) ≈ 0.72
+        #            1 net-pos in 20 tokens  ≈ tanh(0.3) ≈ 0.29
+        #            5 net-pos in 10 tokens  ≈ tanh(3.0) ≈ 0.995
+        SCALE = 6.0
         total_pol = pos + neg
-        raw = (pos - neg) / total_pol if total_pol else 0.0
-        sentiment = max(-1.0, min(1.0, raw))
         if total_pol == 0:
-            label = "neutral"
-        elif sentiment > 0.2:
-            label = "positive"
-        elif sentiment < -0.2:
-            label = "negative"
+            sentiment = 0.0
         else:
-            label = "neutral"
+            raw = (pos - neg) / max(tokens_n, 1)
+            sentiment = math.tanh(raw * SCALE)
+        label = _label_for(sentiment, total_pol)
         conf_density = total_pol / max(tokens_n, 1)
-        # Confidence penalty for very sparse hits
         confidence = 0.0 if conf_density < 0.01 else min(1.0, conf_density * 10)
         return Score(
             sentiment=round(sentiment, 4),

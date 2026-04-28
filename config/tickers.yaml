@@ -1,13 +1,17 @@
 # Tickers for yfinance price collection.
-# Initial universe = BIZD top 12 holdings (as of 2026-04, subject to rebalance)
-# plus benchmarks. Review after BIZD quarterly rebalance.
+# Universe = BIZD top holdings (as of 2026-04, verified against VanEck /
+# Raymond James BDC Market Update / StockAnalysis.com).
+# Review after BIZD quarterly rebalance.
 
 start_date: "2024-01-01"
 
 active_tickers:
-  # BDCs (12)
+  # BDCs — top 12 by BIZD weight (April 2026)
   - symbol: ARCC
     name: "Ares Capital"
+    group: bdc
+  - symbol: OBDC
+    name: "Blue Owl Capital Corp"
     group: bdc
   - symbol: FSK
     name: "FS KKR Capital"
@@ -15,11 +19,11 @@ active_tickers:
   - symbol: BXSL
     name: "Blackstone Secured Lending"
     group: bdc
-  - symbol: OBDC
-    name: "Blue Owl Capital Corp"
-    group: bdc
   - symbol: MAIN
     name: "Main Street Capital"
+    group: bdc
+  - symbol: OTF
+    name: "Blue Owl Technology Finance"
     group: bdc
   - symbol: HTGC
     name: "Hercules Capital"
@@ -27,21 +31,22 @@ active_tickers:
   - symbol: GBDC
     name: "Golub Capital BDC"
     group: bdc
-  - symbol: BBDC
-    name: "Barings BDC"
+  - symbol: TSLX
+    name: "Sixth Street Specialty Lending"
+    group: bdc
+  - symbol: CSWC
+    name: "Capital Southwest"
+    group: bdc
+  - symbol: TRIN
+    name: "Trinity Capital"
+    group: bdc
+  - symbol: OCSL
+    name: "Oaktree Specialty Lending"
     group: bdc
   - symbol: PSEC
     name: "Prospect Capital"
     group: bdc
-  - symbol: TSLX
-    name: "Sixth Street Specialty Lending"
-    group: bdc
-  - symbol: NMFC
-    name: "New Mountain Finance"
-    group: bdc
-  - symbol: CGBD
-    name: "Carlyle Secured Lending"
-    group: bdc
+
   # Benchmarks
   - symbol: BIZD
     name: "VanEck BDC Income ETF"
@@ -53,4 +58,17 @@ active_tickers:
     name: "iShares iBoxx HY Corp Bond ETF"
     group: benchmark
 
-legacy_tickers: []
+# Moved from active to legacy (April 2026) — BIZD weight < 1%
+legacy_tickers:
+  - symbol: BBDC
+    name: "Barings BDC"
+    removed: "2026-04"
+    reason: "BIZD weight dropped to ~0.86%"
+  - symbol: NMFC
+    name: "New Mountain Finance"
+    removed: "2026-04"
+    reason: "BIZD weight dropped to ~0.79%"
+  - symbol: CGBD
+    name: "Carlyle Secured Lending"
+    removed: "2026-04"
+    reason: "BIZD weight dropped to ~0.82%"
