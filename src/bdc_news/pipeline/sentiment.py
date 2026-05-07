@@ -259,11 +259,17 @@ class SentimentScorer:
         #            1 net-pos in 20 tokens  ≈ tanh(0.3) ≈ 0.29
         #            5 net-pos in 10 tokens  ≈ tanh(3.0) ≈ 0.995
         SCALE = 6.0
-        total_pol = pos + neg
+        # Uncertainty words carry a mild negative bias (0.3× each):
+        # financial journalism uses hedging language ("リスク", "懸念",
+        # "uncertainty") to soften criticism, so pure neutral treatment
+        # underweights the negative tone.
+        UNC_NEG_WEIGHT = 0.3
+        effective_neg = neg + unc * UNC_NEG_WEIGHT
+        total_pol = pos + neg + unc
         if total_pol == 0:
             sentiment = 0.0
         else:
-            raw = (pos - neg) / max(tokens_n, 1)
+            raw = (pos - effective_neg) / max(tokens_n, 1)
             sentiment = math.tanh(raw * SCALE)
         label = _label_for(sentiment, total_pol)
         conf_density = total_pol / max(tokens_n, 1)
@@ -289,8 +295,12 @@ def _estimate_tokens(text: str, lang: str) -> int:
 def _label_for(sentiment: float, total_hits: int) -> str:
     if total_hits == 0 and abs(sentiment) <= 0.001:
         return "neutral"
-    if sentiment > 0.2:
+    # Asymmetric thresholds: lower bar for negative to catch
+    # cautionary / critical tone that raw scoring tends to under-weight.
+    # Rationale: financial journalism phrases criticism indirectly
+    # ("懸念", "リスク", "不透明") — these should tip negative, not stay neutral.
+    if sentiment > 0.15:
         return "positive"
-    if sentiment < -0.2:
+    if sentiment < -0.10:
         return "negative"
     return "neutral"

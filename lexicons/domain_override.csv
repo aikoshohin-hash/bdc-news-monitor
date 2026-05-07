@@ -56,6 +56,53 @@ covenant-lite rises,negative,en
 covenant lite increase,negative,en
 interest coverage deteriorates,negative,en
 interest coverage improves,positive,en
+raises questions,negative,en
+raises concerns,negative,en
+growing concerns,negative,en
+mounting concerns,negative,en
+heightened risk,negative,en
+rising risks,negative,en
+rising risk,negative,en
+growing risks,negative,en
+amid risks,negative,en
+amid uncertainty,negative,en
+market discipline,negative,en
+lack of transparency,negative,en
+opacity,negative,en
+opaque,negative,en
+liquidity risk,negative,en
+liquidity risks,negative,en
+liquidity concerns,negative,en
+illiquidity,negative,en
+illiquid,negative,en
+shadow banking,negative,en
+shadow bank,negative,en
+scrutiny,negative,en
+under scrutiny,negative,en
+faces scrutiny,negative,en
+growing scrutiny,negative,en
+regulatory scrutiny,negative,en
+bubble,negative,en
+overheated,negative,en
+overheating,negative,en
+systemic risk,negative,en
+systemic risks,negative,en
+contagion,negative,en
+contagion risk,negative,en
+conflict of interest,negative,en
+conflicts of interest,negative,en
+hidden risk,negative,en
+hidden risks,negative,en
+lax standards,negative,en
+lax underwriting,negative,en
+loose underwriting,negative,en
+deteriorating credit,negative,en
+credit deterioration,negative,en
+redemption gate,negative,en
+redemption gates,negative,en
+gating,negative,en
+lock-up,negative,en
+lockup,negative,en
 デフォルト率の上昇,negative,ja
 デフォルト率上昇,negative,ja
 デフォルト率の低下,positive,ja
@@ -83,3 +130,64 @@ NAVディスカウント縮小,positive,ja
 組成拡大,positive,ja
 規制強化,negative,ja
 規制緩和,positive,ja
+過熱感,negative,ja
+過熱懸念,negative,ja
+バブル懸念,negative,ja
+バブルの様相,negative,ja
+膨張リスク,negative,ja
+急膨張,negative,ja
+市場の歪み,negative,ja
+信用の歪み,negative,ja
+不透明感,negative,ja
+不透明さ,negative,ja
+審査の甘さ,negative,ja
+審査甘い,negative,ja
+規律の欠如,negative,ja
+規律の低下,negative,ja
+規律なき,negative,ja
+透明性の欠如,negative,ja
+透明性の問題,negative,ja
+透明性に欠ける,negative,ja
+情報開示が不十分,negative,ja
+情報開示不足,negative,ja
+利益相反の懸念,negative,ja
+利益相反問題,negative,ja
+流動性の低さ,negative,ja
+流動性に乏しい,negative,ja
+流動性が低い,negative,ja
+流動性に懸念,negative,ja
+換金性が低い,negative,ja
+換金性に乏しい,negative,ja
+解約制限,negative,ja
+解約停止,negative,ja
+償還制限,negative,ja
+影の金融,negative,ja
+影の銀行,negative,ja
+高い手数料,negative,ja
+手数料の高さ,negative,ja
+コスト高,negative,ja
+投資家保護,negative,ja
+投資家保護が不十分,negative,ja
+リスクの蓄積,negative,ja
+リスク蓄積,negative,ja
+リスクが高い,negative,ja
+リスクが高まる,negative,ja
+リスク増大,negative,ja
+焦げ付きリスク,negative,ja
+焦げ付き懸念,negative,ja
+波及リスク,negative,ja
+連鎖リスク,negative,ja
+システミックリスク,negative,ja
+金融安定性,negative,ja
+金融安定リスク,negative,ja
+急成長の裏側,negative,ja
+死角,negative,ja
+落とし穴,negative,ja
+警鐘を鳴らす,negative,ja
+問題を指摘,negative,ja
+リスクを指摘,negative,ja
+懸念を示す,negative,ja
+懸念を表明,negative,ja
+疑問を呈する,negative,ja
+批判的,negative,ja
+否定的,negative,ja

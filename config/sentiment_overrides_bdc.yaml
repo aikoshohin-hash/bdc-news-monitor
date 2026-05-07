@@ -194,6 +194,146 @@ rules:
     lang: ja
     rationale: "リストラクチャリング"
 
+  # -------- Japanese: プライベートクレジット批判表現 (日経等) --------
+  - pattern: "過熱"
+    polarity: -0.30
+    lang: ja
+    rationale: "市場過熱への警鐘（日経頻出）"
+
+  - pattern: "バブル"
+    polarity: -0.40
+    lang: ja
+    rationale: "バブル懸念は明確なネガティブ"
+
+  - pattern: "膨張"
+    polarity: -0.25
+    lang: ja
+    rationale: "急膨張への警戒（リスク蓄積文脈）"
+
+  - pattern: "不透明"
+    polarity: -0.25
+    lang: ja
+    rationale: "透明性欠如＝投資家不利益"
+
+  - pattern: "流動性リスク"
+    polarity: -0.35
+    lang: ja
+    rationale: "PC最大の構造的弱点"
+
+  - pattern: "流動性懸念"
+    polarity: -0.30
+    lang: ja
+    rationale: "流動性リスク同義"
+
+  - pattern: "換金性"
+    polarity: -0.20
+    lang: ja
+    rationale: "換金困難の文脈で使われる"
+    context_required: ["低い", "乏しい", "懸念", "リスク", "問題", "課題", "難しい"]
+
+  - pattern: "規律"
+    polarity: -0.20
+    lang: ja
+    rationale: "規律欠如・規律低下の文脈"
+    context_required: ["欠如", "低下", "甘い", "甘さ", "緩い", "なく", "ない", "失われ", "喪失"]
+
+  - pattern: "歪み"
+    polarity: -0.30
+    lang: ja
+    rationale: "市場の歪み — 構造的問題示唆"
+
+  - pattern: "ずさん"
+    polarity: -0.40
+    lang: ja
+    rationale: "杜撰な審査・運営への批判"
+
+  - pattern: "杜撰"
+    polarity: -0.40
+    lang: ja
+    rationale: "ずさんの漢字表記"
+
+  - pattern: "野放し"
+    polarity: -0.35
+    lang: ja
+    rationale: "規制不十分への批判"
+
+  - pattern: "利益相反"
+    polarity: -0.30
+    lang: ja
+    rationale: "ガバナンス問題"
+
+  - pattern: "情報開示"
+    polarity: -0.15
+    lang: ja
+    rationale: "開示不足文脈でネガティブ"
+    context_required: ["不十分", "不足", "欠如", "問題", "課題", "懸念", "乏しい"]
+
+  - pattern: "警鐘"
+    polarity: -0.30
+    lang: ja
+    rationale: "明確な警告・注意喚起"
+
+  - pattern: "注意喚起"
+    polarity: -0.25
+    lang: ja
+    rationale: "リスク注意"
+
+  - pattern: "システミックリスク"
+    polarity: -0.45
+    lang: ja
+    rationale: "金融システム全体へのリスク波及"
+
+  - pattern: "システミック"
+    polarity: -0.35
+    lang: ja
+    rationale: "システミックリスク言及"
+
+  - pattern: "急拡大"
+    polarity: -0.15
+    lang: ja
+    rationale: "急拡大は制御不能リスク示唆"
+    context_required: ["リスク", "懸念", "問題", "警戒", "注意", "危険", "警鐘"]
+
+  - pattern: "解約制限"
+    polarity: -0.35
+    lang: ja
+    rationale: "投資家ロックアウト＝流動性危機"
+
+  - pattern: "ゲート条項"
+    polarity: -0.30
+    lang: ja
+    rationale: "解約ゲート発動＝流動性ストレス"
+
+  - pattern: "償還停止"
+    polarity: -0.50
+    lang: ja
+    rationale: "ファンド凍結"
+
+  - pattern: "焦げ付き"
+    polarity: -0.40
+    lang: ja
+    rationale: "貸倒の口語表現"
+
+  - pattern: "落とし穴"
+    polarity: -0.25
+    lang: ja
+    rationale: "投資の隠れリスク"
+
+  - pattern: "死角"
+    polarity: -0.25
+    lang: ja
+    rationale: "見えないリスク"
+
+  - pattern: "影の銀行"
+    polarity: -0.30
+    lang: ja
+    rationale: "シャドーバンキングとしてのPC批判"
+
+  - pattern: "シャドーバンキング"
+    polarity: -0.30
+    lang: ja
+    rationale: "規制外金融としてのネガ"
+
   - pattern: "プライベートクレジット"
     polarity: 0.0
     lang: ja
