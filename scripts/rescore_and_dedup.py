@@ -15,7 +15,7 @@ import re
 import sys
 import uuid
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Add src to path
@@ -159,107 +159,169 @@ def run_dedup(articles: list[dict]) -> dict:
 
 
 def rebuild_indices(articles: list[dict]) -> None:
-    """Rebuild daily_index.json, monthly_index.json, by_entity.json from deduped articles."""
+    """Rebuild daily_index.json, monthly_index.json, by_entity.json from deduped articles.
+
+    IMPORTANT: output format must match what app.js expects:
+      daily_index:   {"generated_at": "...", "items": [{"date", "region", "n_articles", "sent_mean", "sent_weighted", "pos_ratio", "neg_ratio", "heat_index"}]}
+      monthly_index: {"generated_at": "...", "items": [{"month", "region", "n_articles", "sent_weighted", "pos_ratio", "neg_ratio"}]}
+      by_entity:     {"generated_at": "...", "items": [{"symbol", "name", "n", "pos", "neg", "sent_mean", "by_month": [...]}]}
+    """
+    now = datetime.now(timezone.utc).isoformat()
+
     # ── daily index ──
-    daily: dict[str, dict[str, list]] = {}  # region -> date -> scores
+    # Group by (date, region) — each article contributes to its own region AND "all"
+    daily_bucket: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for a in articles:
         d = (a.get("published_at") or "")[:10]
         if not d:
             continue
         region = a.get("region", "global")
-        for r in [region, "all"]:
-            daily.setdefault(r, {}).setdefault(d, []).append(a)
+        daily_bucket[(d, region)].append(a)
+        daily_bucket[(d, "all")].append(a)
 
-    daily_out = {}
-    for region, dates in daily.items():
-        rows = []
-        for d in sorted(dates.keys()):
-            arts = dates[d]
-            sents = [a["sentiment"] for a in arts]
-            labels = Counter(a["label"] for a in arts)
-            n = len(arts)
-            rows.append({
-                "date": d,
-                "n_articles": n,
-                "sent_mean": round(sum(sents) / n, 4) if n else 0,
-                "sent_median": round(sorted(sents)[n // 2], 4) if n else 0,
-                "n_positive": labels.get("positive", 0),
-                "n_neutral": labels.get("neutral", 0),
-                "n_negative": labels.get("negative", 0),
-                "pos_ratio": round(labels.get("positive", 0) / n, 4) if n else 0,
-                "neg_ratio": round(labels.get("negative", 0) / n, 4) if n else 0,
-            })
-        daily_out[region] = rows
+    daily_items = []
+    for (d, region), arts in sorted(daily_bucket.items()):
+        sents = [a["sentiment"] for a in arts if a.get("sentiment") is not None]
+        n = len(arts)
+        if n == 0:
+            continue
+        n_pos = sum(1 for a in arts if a.get("label") == "positive")
+        n_neg = sum(1 for a in arts if a.get("label") == "negative")
+        sent_mean = round(sum(sents) / len(sents), 4) if sents else 0.0
+        # sent_weighted: confidence-weighted mean
+        w_sum = sum(a["sentiment"] * (a.get("confidence") or 0.5) for a in arts if a.get("sentiment") is not None)
+        w_total = sum((a.get("confidence") or 0.5) for a in arts if a.get("sentiment") is not None)
+        sent_weighted = round(w_sum / w_total, 4) if w_total > 0 else 0.0
+        pos_ratio = round(n_pos / n, 4)
+        neg_ratio = round(n_neg / n, 4)
+        # heat_index: simple volume × abs(sentiment) signal
+        heat_index = round(n * abs(sent_weighted), 4)
+        daily_items.append({
+            "date": d,
+            "region": region,
+            "n_articles": n,
+            "sent_mean": sent_mean,
+            "sent_weighted": sent_weighted,
+            "pos_ratio": pos_ratio,
+            "neg_ratio": neg_ratio,
+            "heat_index": heat_index,
+        })
 
-    with DAILY_JSON.open("w", encoding="utf-8") as f:
-        json.dump(daily_out, f, ensure_ascii=False, indent=1)
+    _write_json(DAILY_JSON, {"generated_at": now, "items": daily_items})
 
     # ── monthly index ──
-    monthly: dict[str, dict[str, list]] = {}
+    monthly_bucket: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for a in articles:
-        d = (a.get("published_at") or "")[:7]  # YYYY-MM
-        if not d:
+        m = (a.get("published_at") or "")[:7]
+        if not m:
             continue
         region = a.get("region", "global")
-        for r in [region, "all"]:
-            monthly.setdefault(r, {}).setdefault(d, []).append(a)
+        monthly_bucket[(m, region)].append(a)
+        monthly_bucket[(m, "all")].append(a)
 
-    monthly_out = {}
-    for region, months in monthly.items():
-        rows = []
-        for m in sorted(months.keys()):
-            arts = months[m]
-            sents = [a["sentiment"] for a in arts]
-            labels = Counter(a["label"] for a in arts)
-            n = len(arts)
-            rows.append({
-                "month": m,
-                "n_articles": n,
-                "sent_mean": round(sum(sents) / n, 4) if n else 0,
-                "n_positive": labels.get("positive", 0),
-                "n_neutral": labels.get("neutral", 0),
-                "n_negative": labels.get("negative", 0),
-            })
-        monthly_out[region] = rows
+    monthly_items = []
+    for (m, region), arts in sorted(monthly_bucket.items()):
+        n = len(arts)
+        if n == 0:
+            continue
+        n_pos = sum(1 for a in arts if a.get("label") == "positive")
+        n_neg = sum(1 for a in arts if a.get("label") == "negative")
+        w_sum = sum(a["sentiment"] * (a.get("confidence") or 0.5) for a in arts if a.get("sentiment") is not None)
+        w_total = sum((a.get("confidence") or 0.5) for a in arts if a.get("sentiment") is not None)
+        sent_weighted = round(w_sum / w_total, 4) if w_total > 0 else 0.0
+        monthly_items.append({
+            "month": m,
+            "region": region,
+            "n_articles": n,
+            "sent_weighted": sent_weighted,
+            "pos_ratio": round(n_pos / n, 4),
+            "neg_ratio": round(n_neg / n, 4),
+        })
 
-    with MONTHLY_JSON.open("w", encoding="utf-8") as f:
-        json.dump(monthly_out, f, ensure_ascii=False, indent=1)
+    _write_json(MONTHLY_JSON, {"generated_at": now, "items": monthly_items})
 
     # ── by entity ──
-    # Extract ticker mentions from event_tags
-    entity_data: dict[str, list[dict]] = defaultdict(list)
-    for a in articles:
-        tags = a.get("event_tags") or []
-        if isinstance(tags, str):
-            tags = [t.strip() for t in tags.split(",") if t.strip()]
-        # Use source-based entity detection
-        title = (a.get("title") or "").upper()
-        # Common BDC tickers
-        tickers = [
-            "ARCC", "MAIN", "BXSL", "OBDC", "GBDC", "GSBD", "TPVG",
-            "PSEC", "FSK", "HTGC", "ORCC", "OCSL", "BLUE OWL", "OWL",
-            "BIZD", "CCAP", "KBDC"
-        ]
-        for tk in tickers:
-            if tk in title:
-                entity_data[tk].append(a)
+    # Load ticker config if available, otherwise use hardcoded list
+    ticker_map = _load_ticker_map()
 
-    entity_out = {}
-    for ticker, arts in entity_data.items():
-        sents = [a["sentiment"] for a in arts]
-        labels = Counter(a["label"] for a in arts)
-        n = len(arts)
-        entity_out[ticker] = {
-            "n_articles": n,
-            "sent_mean": round(sum(sents) / n, 4) if n else 0,
-            "n_positive": labels.get("positive", 0),
-            "n_neutral": labels.get("neutral", 0),
-            "n_negative": labels.get("negative", 0),
-            "articles": [{"date": a.get("published_at", "")[:10], "title": a.get("title", ""), "sentiment": a["sentiment"]} for a in arts[:50]],
+    entity_counts: dict[str, dict] = {}
+    for sym, name in ticker_map.items():
+        entity_counts[sym] = {
+            "symbol": sym, "name": name,
+            "n": 0, "pos": 0, "neg": 0,
+            "sent_sum": 0.0, "sent_n": 0,
+            "by_month": defaultdict(lambda: {"n": 0, "sent_sum": 0.0, "sent_n": 0}),
         }
 
-    with ENTITY_JSON.open("w", encoding="utf-8") as f:
-        json.dump(entity_out, f, ensure_ascii=False, indent=1)
+    for a in articles:
+        blob = f"{a.get('title', '')} {a.get('snippet', '')}".upper()
+        for sym in ticker_map:
+            if sym in blob or ticker_map[sym].upper() in blob:
+                c = entity_counts[sym]
+                c["n"] += 1
+                m = (a.get("published_at") or "")[:7]
+                bm = c["by_month"][m or "unknown"]
+                bm["n"] += 1
+                sent = a.get("sentiment")
+                conf = a.get("confidence", 0) or 0
+                if sent is not None and conf > 0:
+                    c["sent_sum"] += sent
+                    c["sent_n"] += 1
+                    bm["sent_sum"] += sent
+                    bm["sent_n"] += 1
+                    if sent > 0.2:
+                        c["pos"] += 1
+                    elif sent < -0.2:
+                        c["neg"] += 1
+
+    entity_items = []
+    for sym, c in entity_counts.items():
+        mean = round(c["sent_sum"] / c["sent_n"], 4) if c["sent_n"] else 0.0
+        by_month = [
+            {"month": m, "n": v["n"], "sent_mean": round(v["sent_sum"] / v["sent_n"], 4) if v["sent_n"] else 0.0}
+            for m, v in sorted(c["by_month"].items())
+        ]
+        entity_items.append({
+            "symbol": c["symbol"], "name": c["name"],
+            "n": c["n"], "pos": c["pos"], "neg": c["neg"],
+            "sent_mean": mean, "by_month": by_month,
+        })
+    entity_items.sort(key=lambda x: -x["n"])
+
+    _write_json(ENTITY_JSON, {"generated_at": now, "items": entity_items})
+
+
+def _write_json(path: Path, obj) -> None:
+    """Write JSON with compact separators (matches to_static_json.py format)."""
+    path.write_text(
+        json.dumps(obj, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
+
+
+def _load_ticker_map() -> dict[str, str]:
+    """Load ticker→name map from config/tickers.yaml or fall back to hardcoded."""
+    try:
+        import yaml
+        tickers_yaml = ROOT / "config" / "tickers.yaml"
+        if tickers_yaml.exists():
+            data = yaml.safe_load(tickers_yaml.read_text(encoding="utf-8")) or {}
+            tickers = data.get("active_tickers", []) or []
+            bdc = {t["symbol"]: t["name"] for t in tickers if t.get("group") == "bdc"}
+            if bdc:
+                return bdc
+    except Exception:
+        pass
+    # Fallback: BIZD top 13
+    return {
+        "ARCC": "Ares Capital", "BXSL": "Blackstone Secured Lending",
+        "OBDC": "Blue Owl Capital", "MAIN": "Main Street Capital",
+        "HTGC": "Hercules Capital", "GBDC": "Golub Capital BDC",
+        "GSBD": "Goldman Sachs BDC", "FSK": "FS KKR Capital",
+        "OCSL": "Oaktree Specialty Lending", "ORCC": "Owl Rock Core Income",
+        "TPVG": "TriplePoint Venture Growth", "PSEC": "Prospect Capital",
+        "CCAP": "Crescent Capital BDC",
+    }
 
 
 def export_csv(articles: list[dict]) -> None:
@@ -318,7 +380,7 @@ def main():
 
     # 4. Save articles JSON
     data["items"] = deduped
-    data["generated_at"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    data["generated_at"] = datetime.now(timezone.utc).isoformat()
     with ARTICLES_JSON.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
     print(f"\n[4/5] Saved articles.json ({len(deduped)} articles)")
