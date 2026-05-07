@@ -107,6 +107,7 @@
       state.articleCursor += 50;
       renderArticles();
     });
+    document.getElementById("csv-export").addEventListener("click", exportArticlesCsv);
     document.getElementById("entity-wl-only").addEventListener("change", renderEntities);
     // Heatmap controls
     document.getElementById("heatmap-range").addEventListener("change", renderHeatmap);
@@ -747,6 +748,55 @@
       .join("");
     document.getElementById("load-more").style.display =
       rows.length > state.articleCursor ? "" : "none";
+  }
+
+  function exportArticlesCsv() {
+    // Apply same filters as renderArticles
+    const q = (document.getElementById("article-search").value || "").toLowerCase();
+    const label = document.getElementById("article-label").value;
+    const region = document.getElementById("article-region").value;
+    const eventSel = document.getElementById("article-events");
+    const selectedEvents = eventSel
+      ? [...eventSel.selectedOptions].map((o) => o.value).filter(Boolean)
+      : [];
+    let rows = state.articles.slice();
+    if (q) rows = rows.filter((r) => (r.title + " " + (r.snippet || "")).toLowerCase().includes(q));
+    if (label) rows = rows.filter((r) => r.label === label);
+    if (region) rows = rows.filter((r) => r.region === region);
+    if (selectedEvents.length) {
+      rows = rows.filter((r) => {
+        const tags = r.event_tags || [];
+        return selectedEvents.some((t) => tags.includes(t));
+      });
+    }
+    // Build CSV
+    const header = ["published_at","source","language","region","title","sentiment","label","confidence","event_tags","cluster_size","url"];
+    const csvRows = [header.join(",")];
+    for (const a of rows) {
+      const tags = (a.event_tags || []).join("; ");
+      const vals = [
+        (a.published_at || "").slice(0, 10),
+        `"${(a.source || "").replace(/"/g, '""')}"`,
+        a.language || "",
+        a.region || "",
+        `"${(a.title || "").replace(/"/g, '""')}"`,
+        a.sentiment == null ? "" : a.sentiment.toFixed(4),
+        a.label || "",
+        a.confidence == null ? "" : a.confidence.toFixed(3),
+        `"${tags.replace(/"/g, '""')}"`,
+        a.cluster_size || 1,
+        a.url || "",
+      ];
+      csvRows.push(vals.join(","));
+    }
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csvRows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `bdc_articles_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   function renderEventBadges(a) {

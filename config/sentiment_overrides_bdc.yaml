@@ -338,3 +338,157 @@ rules:
     polarity: 0.0
     lang: ja
     rationale: "中立タグ用（キーワード一致を阻害しないためのアンカー）"
+
+  # -------- Japanese: regulatory / oversight expressions --------
+  - pattern: "監視強化"
+    polarity: -0.35
+    lang: ja
+    rationale: "当局が監視強化＝市場リスク認識の表れ"
+
+  - pattern: "提言"
+    polarity: -0.20
+    lang: ja
+    rationale: "規制当局の提言＝懸念表明"
+    context_required: ["FSB", "金融庁", "当局", "規制", "監視", "リスク", "懸念"]
+
+  - pattern: "情報を請求"
+    polarity: -0.25
+    lang: ja
+    rationale: "当局の情報照会＝監督強化"
+
+  - pattern: "情報提供を要請"
+    polarity: -0.25
+    lang: ja
+    rationale: "当局のデータ要請"
+
+  - pattern: "詳細情報の提供要請"
+    polarity: -0.25
+    lang: ja
+    rationale: "FRB等の詳細情報要請"
+
+  - pattern: "実態調査"
+    polarity: -0.25
+    lang: ja
+    rationale: "当局の調査開始"
+
+  - pattern: "実態把握"
+    polarity: -0.20
+    lang: ja
+    rationale: "当局のファクトファインディング"
+
+  # -------- Japanese: investor sentiment / market stress --------
+  - pattern: "反応冷ややか"
+    polarity: -0.35
+    lang: ja
+    rationale: "投資家の冷淡な反応"
+
+  - pattern: "冷ややか"
+    polarity: -0.25
+    lang: ja
+    rationale: "ネガティブな市場反応"
+
+  - pattern: "取り付け騒ぎ"
+    polarity: -0.50
+    lang: ja
+    rationale: "パニック売り・流動性危機"
+
+  - pattern: "正念場"
+    polarity: -0.30
+    lang: ja
+    rationale: "市場の重大な岐路"
+
+  - pattern: "苦渋の選択"
+    polarity: -0.35
+    lang: ja
+    rationale: "厳しい判断を迫られる状況"
+
+  - pattern: "市場の緊張"
+    polarity: -0.30
+    lang: ja
+    rationale: "市場ストレスの高まり"
+
+  - pattern: "亀裂"
+    polarity: -0.35
+    lang: ja
+    rationale: "市場構造の破綻兆候"
+
+  - pattern: "不穏"
+    polarity: -0.30
+    lang: ja
+    rationale: "不安定な市場環境"
+
+  - pattern: "炭鉱のカナリア"
+    polarity: -0.40
+    lang: ja
+    rationale: "先行的な危機警報"
+
+  - pattern: "ゴキブリ"
+    polarity: -0.35
+    lang: ja
+    rationale: "一つ問題が見つかれば他にもある"
+
+  - pattern: "リーマンショックの再来"
+    polarity: -0.50
+    lang: ja
+    rationale: "金融危機の類似性への警告"
+
+  - pattern: "引き下げ"
+    polarity: -0.30
+    lang: ja
+    rationale: "NAV/格付け/目標株価等の引下げ"
+
+  - pattern: "足止め"
+    polarity: -0.30
+    lang: ja
+    rationale: "投資家資金の凍結"
+
+  - pattern: "殺到"
+    polarity: -0.25
+    lang: ja
+    rationale: "償還請求殺到は流動性ストレス"
+    context_required: ["償還", "買い戻し", "解約", "引き出し"]
+
+  - pattern: "動向注視"
+    polarity: -0.15
+    lang: ja
+    rationale: "規制当局の注視＝潜在リスク認識"
+
+  - pattern: "精査"
+    polarity: -0.20
+    lang: ja
+    rationale: "厳密な調査＝問題の可能性"
+
+  - pattern: "火種"
+    polarity: -0.30
+    lang: ja
+    rationale: "将来のリスク要因"
+
+  - pattern: "揺れる"
+    polarity: -0.25
+    lang: ja
+    rationale: "市場・企業の動揺"
+
+  - pattern: "矛盾"
+    polarity: -0.25
+    lang: ja
+    rationale: "構造的な矛盾の指摘"
+
+  - pattern: "厳選"
+    polarity: -0.15
+    lang: ja
+    rationale: "選別姿勢＝市場環境悪化のシグナル"
+
+  - pattern: "閉鎖"
+    polarity: -0.30
+    lang: ja
+    rationale: "事業・ファンドの閉鎖"
+
+  - pattern: "52週安値"
+    polarity: -0.40
+    lang: ja
+    rationale: "年間最安値"
+
+  - pattern: "安値を記録"
+    polarity: -0.40
+    lang: ja
+    rationale: "安値更新"

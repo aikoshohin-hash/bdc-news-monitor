@@ -1,1 +1,1104 @@
-{"generated_at":"2026-05-06T22:46:59.360593+00:00","items":[{"month":"2013-06","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2013-06","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2013-08","region":"all","n_articles":1,"sent_weighted":0.3558,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2013-08","region":"jp","n_articles":1,"sent_weighted":0.3558,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2017-08","region":"all","n_articles":1,"sent_weighted":0.3675,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2017-08","region":"jp","n_articles":1,"sent_weighted":0.3675,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2017-12","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2017-12","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2018-01","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2018-01","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2018-05","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2018-05","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-01","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-01","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-08","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-08","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-09","region":"all","n_articles":5,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-09","region":"jp","n_articles":5,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-10","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2019-10","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2020-04","region":"all","n_articles":1,"sent_weighted":-0.2564,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2020-04","region":"jp","n_articles":1,"sent_weighted":-0.2564,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2020-06","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2020-06","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2020-07","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2020-07","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2021-05","region":"all","n_articles":1,"sent_weighted":0.3484,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2021-05","region":"jp","n_articles":1,"sent_weighted":0.3484,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2021-06","region":"all","n_articles":1,"sent_weighted":-0.3799,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2021-06","region":"jp","n_articles":1,"sent_weighted":-0.3799,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2021-11","region":"all","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2021-11","region":"global","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2021-12","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2021-12","region":"global","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-02","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-02","region":"global","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-03","region":"all","n_articles":3,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-03","region":"jp","n_articles":3,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-05","region":"all","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-05","region":"jp","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-08","region":"all","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-08","region":"jp","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-09","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-09","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-10","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2022-10","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-02","region":"all","n_articles":1,"sent_weighted":-0.1651,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2023-02","region":"jp","n_articles":1,"sent_weighted":-0.1651,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2023-07","region":"all","n_articles":3,"sent_weighted":0.0994,"pos_ratio":0.3333,"neg_ratio":0.0},{"month":"2023-07","region":"global","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-07","region":"jp","n_articles":2,"sent_weighted":0.1492,"pos_ratio":0.5,"neg_ratio":0.0},{"month":"2023-09","region":"all","n_articles":3,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-09","region":"global","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-09","region":"jp","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-10","region":"all","n_articles":3,"sent_weighted":0.0943,"pos_ratio":0.3333,"neg_ratio":0.0},{"month":"2023-10","region":"jp","n_articles":3,"sent_weighted":0.0943,"pos_ratio":0.3333,"neg_ratio":0.0},{"month":"2023-11","region":"all","n_articles":3,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-11","region":"jp","n_articles":3,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-12","region":"all","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-12","region":"global","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2023-12","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-01","region":"all","n_articles":4,"sent_weighted":-0.263,"pos_ratio":0.0,"neg_ratio":0.5},{"month":"2024-01","region":"jp","n_articles":4,"sent_weighted":-0.263,"pos_ratio":0.0,"neg_ratio":0.5},{"month":"2024-02","region":"all","n_articles":2,"sent_weighted":0.164,"pos_ratio":0.5,"neg_ratio":0.0},{"month":"2024-02","region":"jp","n_articles":2,"sent_weighted":0.164,"pos_ratio":0.5,"neg_ratio":0.0},{"month":"2024-03","region":"all","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-03","region":"global","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-04","region":"all","n_articles":1,"sent_weighted":-0.6154,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2024-04","region":"jp","n_articles":1,"sent_weighted":-0.6154,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2024-05","region":"all","n_articles":3,"sent_weighted":-0.2809,"pos_ratio":0.0,"neg_ratio":0.3333},{"month":"2024-05","region":"global","n_articles":1,"sent_weighted":-0.8428,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2024-05","region":"jp","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-07","region":"all","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-07","region":"jp","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-08","region":"all","n_articles":10,"sent_weighted":0.0589,"pos_ratio":0.2,"neg_ratio":0.1},{"month":"2024-08","region":"global","n_articles":3,"sent_weighted":0.2925,"pos_ratio":0.6667,"neg_ratio":0.0},{"month":"2024-08","region":"jp","n_articles":7,"sent_weighted":-0.0411,"pos_ratio":0.0,"neg_ratio":0.1429},{"month":"2024-09","region":"all","n_articles":3,"sent_weighted":0.1826,"pos_ratio":0.3333,"neg_ratio":0.0},{"month":"2024-09","region":"global","n_articles":2,"sent_weighted":0.274,"pos_ratio":0.5,"neg_ratio":0.0},{"month":"2024-09","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-10","region":"all","n_articles":10,"sent_weighted":0.0771,"pos_ratio":0.2,"neg_ratio":0.1},{"month":"2024-10","region":"global","n_articles":3,"sent_weighted":0.1611,"pos_ratio":0.3333,"neg_ratio":0.3333},{"month":"2024-10","region":"jp","n_articles":7,"sent_weighted":0.0411,"pos_ratio":0.1429,"neg_ratio":0.0},{"month":"2024-11","region":"all","n_articles":6,"sent_weighted":-0.4057,"pos_ratio":0.3333,"neg_ratio":0.5},{"month":"2024-11","region":"global","n_articles":3,"sent_weighted":-0.964,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2024-11","region":"jp","n_articles":3,"sent_weighted":0.1525,"pos_ratio":0.6667,"neg_ratio":0.0},{"month":"2024-12","region":"all","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2024-12","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2025-01","region":"all","n_articles":2,"sent_weighted":0.4777,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2025-01","region":"global","n_articles":1,"sent_weighted":0.5479,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2025-01","region":"jp","n_articles":1,"sent_weighted":0.4074,"pos_ratio":1.0,"neg_ratio":0.0},{"month":"2025-02","region":"all","n_articles":6,"sent_weighted":-0.1298,"pos_ratio":0.3333,"neg_ratio":0.3333},{"month":"2025-02","region":"global","n_articles":3,"sent_weighted":-0.3834,"pos_ratio":0.3333,"neg_ratio":0.6667},{"month":"2025-02","region":"jp","n_articles":3,"sent_weighted":0.1239,"pos_ratio":0.3333,"neg_ratio":0.0},{"month":"2025-03","region":"all","n_articles":2,"sent_weighted":-0.244,"pos_ratio":0.0,"neg_ratio":0.5},{"month":"2025-03","region":"global","n_articles":1,"sent_weighted":-0.4879,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2025-03","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2025-04","region":"all","n_articles":1,"sent_weighted":-0.6081,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2025-04","region":"global","n_articles":1,"sent_weighted":-0.6081,"pos_ratio":0.0,"neg_ratio":1.0},{"month":"2025-05","region":"all","n_articles":6,"sent_weighted":-0.2365,"pos_ratio":0.1667,"neg_ratio":0.3333},{"month":"2025-05","region":"global","n_articles":4,"sent_weighted":-0.4125,"pos_ratio":0.0,"neg_ratio":0.5},{"month":"2025-05","region":"jp","n_articles":2,"sent_weighted":0.1155,"pos_ratio":0.5,"neg_ratio":0.0},{"month":"2025-06","region":"all","n_articles":5,"sent_weighted":-0.0728,"pos_ratio":0.0,"neg_ratio":0.2},{"month":"2025-06","region":"global","n_articles":3,"sent_weighted":-0.1213,"pos_ratio":0.0,"neg_ratio":0.3333},{"month":"2025-06","region":"jp","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2025-07","region":"all","n_articles":13,"sent_weighted":-0.1567,"pos_ratio":0.2308,"neg_ratio":0.3846},{"month":"2025-07","region":"global","n_articles":13,"sent_weighted":-0.1567,"pos_ratio":0.2308,"neg_ratio":0.3846},{"month":"2025-08","region":"all","n_articles":23,"sent_weighted":-0.1645,"pos_ratio":0.1304,"neg_ratio":0.3043},{"month":"2025-08","region":"global","n_articles":22,"sent_weighted":-0.172,"pos_ratio":0.1364,"neg_ratio":0.3182},{"month":"2025-08","region":"jp","n_articles":1,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2025-09","region":"all","n_articles":12,"sent_weighted":0.0451,"pos_ratio":0.4167,"neg_ratio":0.25},{"month":"2025-09","region":"global","n_articles":9,"sent_weighted":0.0683,"pos_ratio":0.4444,"neg_ratio":0.2222},{"month":"2025-09","region":"jp","n_articles":3,"sent_weighted":-0.0246,"pos_ratio":0.3333,"neg_ratio":0.3333},{"month":"2025-10","region":"all","n_articles":31,"sent_weighted":-0.2454,"pos_ratio":0.0,"neg_ratio":0.4516},{"month":"2025-10","region":"global","n_articles":25,"sent_weighted":-0.2382,"pos_ratio":0.0,"neg_ratio":0.44},{"month":"2025-10","region":"jp","n_articles":6,"sent_weighted":-0.2751,"pos_ratio":0.0,"neg_ratio":0.5},{"month":"2025-11","region":"all","n_articles":48,"sent_weighted":-0.1059,"pos_ratio":0.1042,"neg_ratio":0.2292},{"month":"2025-11","region":"global","n_articles":38,"sent_weighted":-0.1231,"pos_ratio":0.1053,"neg_ratio":0.2632},{"month":"2025-11","region":"jp","n_articles":10,"sent_weighted":-0.0407,"pos_ratio":0.1,"neg_ratio":0.1},{"month":"2025-12","region":"all","n_articles":36,"sent_weighted":0.0842,"pos_ratio":0.4167,"neg_ratio":0.25},{"month":"2025-12","region":"global","n_articles":28,"sent_weighted":0.1273,"pos_ratio":0.3929,"neg_ratio":0.1786},{"month":"2025-12","region":"jp","n_articles":8,"sent_weighted":-0.0665,"pos_ratio":0.5,"neg_ratio":0.5},{"month":"2026-01","region":"all","n_articles":43,"sent_weighted":-0.1036,"pos_ratio":0.1395,"neg_ratio":0.3023},{"month":"2026-01","region":"global","n_articles":41,"sent_weighted":-0.1086,"pos_ratio":0.1463,"neg_ratio":0.3171},{"month":"2026-01","region":"jp","n_articles":2,"sent_weighted":0.0,"pos_ratio":0.0,"neg_ratio":0.0},{"month":"2026-02","region":"all","n_articles":130,"sent_weighted":-0.1461,"pos_ratio":0.0923,"neg_ratio":0.3462},{"month":"2026-02","region":"global","n_articles":101,"sent_weighted":-0.1184,"pos_ratio":0.1089,"neg_ratio":0.2673},{"month":"2026-02","region":"jp","n_articles":29,"sent_weighted":-0.2425,"pos_ratio":0.0345,"neg_ratio":0.6207},{"month":"2026-03","region":"all","n_articles":184,"sent_weighted":-0.2129,"pos_ratio":0.0924,"neg_ratio":0.4457},{"month":"2026-03","region":"global","n_articles":110,"sent_weighted":-0.1265,"pos_ratio":0.1273,"neg_ratio":0.3364},{"month":"2026-03","region":"jp","n_articles":74,"sent_weighted":-0.3413,"pos_ratio":0.0405,"neg_ratio":0.6081},{"month":"2026-04","region":"all","n_articles":839,"sent_weighted":-0.1941,"pos_ratio":0.124,"neg_ratio":0.41},{"month":"2026-04","region":"global","n_articles":595,"sent_weighted":-0.1613,"pos_ratio":0.1395,"neg_ratio":0.3378},{"month":"2026-04","region":"jp","n_articles":244,"sent_weighted":-0.2739,"pos_ratio":0.0861,"neg_ratio":0.5861},{"month":"2026-05","region":"all","n_articles":429,"sent_weighted":-0.2449,"pos_ratio":0.1002,"neg_ratio":0.4592},{"month":"2026-05","region":"global","n_articles":389,"sent_weighted":-0.2468,"pos_ratio":0.1003,"neg_ratio":0.4473},{"month":"2026-05","region":"jp","n_articles":40,"sent_weighted":-0.2266,"pos_ratio":0.1,"neg_ratio":0.575}]}
+{
+ "jp": [
+  {
+   "month": "2013-06",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2013-08",
+   "n_articles": 1,
+   "sent_mean": 0.3558,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2017-08",
+   "n_articles": 1,
+   "sent_mean": 0.3675,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2017-12",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2018-01",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2018-05",
+   "n_articles": 1,
+   "sent_mean": 0.719,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-01",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-08",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-09",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-10",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2020-04",
+   "n_articles": 1,
+   "sent_mean": -0.2564,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2020-06",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2020-07",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2021-05",
+   "n_articles": 1,
+   "sent_mean": 0.3484,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2021-06",
+   "n_articles": 1,
+   "sent_mean": -0.3799,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2022-03",
+   "n_articles": 1,
+   "sent_mean": 0.3689,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-05",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-08",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-09",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-10",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-02",
+   "n_articles": 1,
+   "sent_mean": -0.1651,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2023-07",
+   "n_articles": 2,
+   "sent_mean": 0.1492,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-09",
+   "n_articles": 1,
+   "sent_mean": 0.4387,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-10",
+   "n_articles": 3,
+   "sent_mean": 0.0943,
+   "n_positive": 1,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-11",
+   "n_articles": 3,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 3,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-12",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-01",
+   "n_articles": 4,
+   "sent_mean": -0.263,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 2
+  },
+  {
+   "month": "2024-02",
+   "n_articles": 2,
+   "sent_mean": 0.164,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-04",
+   "n_articles": 1,
+   "sent_mean": -0.6154,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-05",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-07",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-08",
+   "n_articles": 4,
+   "sent_mean": -0.072,
+   "n_positive": 0,
+   "n_neutral": 3,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-09",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-10",
+   "n_articles": 7,
+   "sent_mean": 0.0411,
+   "n_positive": 1,
+   "n_neutral": 6,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-11",
+   "n_articles": 3,
+   "sent_mean": 0.1525,
+   "n_positive": 2,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-12",
+   "n_articles": 1,
+   "sent_mean": -0.9465,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-01",
+   "n_articles": 1,
+   "sent_mean": 0.4074,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-02",
+   "n_articles": 3,
+   "sent_mean": 0.1239,
+   "n_positive": 1,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-03",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-05",
+   "n_articles": 2,
+   "sent_mean": 0.1155,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-06",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-08",
+   "n_articles": 1,
+   "sent_mean": 0.4541,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-09",
+   "n_articles": 3,
+   "sent_mean": -0.0246,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-10",
+   "n_articles": 6,
+   "sent_mean": -0.2752,
+   "n_positive": 0,
+   "n_neutral": 3,
+   "n_negative": 3
+  },
+  {
+   "month": "2025-11",
+   "n_articles": 7,
+   "sent_mean": -0.1929,
+   "n_positive": 0,
+   "n_neutral": 4,
+   "n_negative": 3
+  },
+  {
+   "month": "2025-12",
+   "n_articles": 6,
+   "sent_mean": -0.0795,
+   "n_positive": 3,
+   "n_neutral": 0,
+   "n_negative": 3
+  },
+  {
+   "month": "2026-01",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2026-02",
+   "n_articles": 22,
+   "sent_mean": -0.3199,
+   "n_positive": 2,
+   "n_neutral": 4,
+   "n_negative": 16
+  },
+  {
+   "month": "2026-03",
+   "n_articles": 68,
+   "sent_mean": -0.473,
+   "n_positive": 4,
+   "n_neutral": 13,
+   "n_negative": 51
+  },
+  {
+   "month": "2026-04",
+   "n_articles": 134,
+   "sent_mean": -0.4198,
+   "n_positive": 11,
+   "n_neutral": 23,
+   "n_negative": 100
+  },
+  {
+   "month": "2026-05",
+   "n_articles": 26,
+   "sent_mean": -0.4877,
+   "n_positive": 2,
+   "n_neutral": 3,
+   "n_negative": 21
+  }
+ ],
+ "all": [
+  {
+   "month": "2013-06",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2013-08",
+   "n_articles": 1,
+   "sent_mean": 0.3558,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2017-08",
+   "n_articles": 1,
+   "sent_mean": 0.3675,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2017-12",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2018-01",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2018-05",
+   "n_articles": 1,
+   "sent_mean": 0.719,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-01",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-08",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-09",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2019-10",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2020-04",
+   "n_articles": 1,
+   "sent_mean": -0.2564,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2020-06",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2020-07",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2021-05",
+   "n_articles": 1,
+   "sent_mean": 0.3484,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2021-06",
+   "n_articles": 1,
+   "sent_mean": -0.3799,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2021-11",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2021-12",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-02",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-03",
+   "n_articles": 1,
+   "sent_mean": 0.3689,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-05",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-08",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-09",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-10",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-02",
+   "n_articles": 1,
+   "sent_mean": -0.1651,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2023-07",
+   "n_articles": 3,
+   "sent_mean": 0.0994,
+   "n_positive": 1,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-09",
+   "n_articles": 2,
+   "sent_mean": 0.2193,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-10",
+   "n_articles": 3,
+   "sent_mean": 0.0943,
+   "n_positive": 1,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-11",
+   "n_articles": 3,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 3,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-12",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-01",
+   "n_articles": 4,
+   "sent_mean": -0.263,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 2
+  },
+  {
+   "month": "2024-02",
+   "n_articles": 2,
+   "sent_mean": 0.164,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-03",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-04",
+   "n_articles": 1,
+   "sent_mean": -0.6154,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-05",
+   "n_articles": 3,
+   "sent_mean": -0.2809,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-07",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-08",
+   "n_articles": 7,
+   "sent_mean": 0.0842,
+   "n_positive": 2,
+   "n_neutral": 4,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-09",
+   "n_articles": 3,
+   "sent_mean": 0.1826,
+   "n_positive": 1,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-10",
+   "n_articles": 10,
+   "sent_mean": 0.0771,
+   "n_positive": 2,
+   "n_neutral": 7,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-11",
+   "n_articles": 6,
+   "sent_mean": -0.4057,
+   "n_positive": 2,
+   "n_neutral": 1,
+   "n_negative": 3
+  },
+  {
+   "month": "2024-12",
+   "n_articles": 1,
+   "sent_mean": -0.9465,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-01",
+   "n_articles": 2,
+   "sent_mean": 0.4777,
+   "n_positive": 2,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-02",
+   "n_articles": 6,
+   "sent_mean": -0.1298,
+   "n_positive": 2,
+   "n_neutral": 2,
+   "n_negative": 2
+  },
+  {
+   "month": "2025-03",
+   "n_articles": 2,
+   "sent_mean": -0.244,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-04",
+   "n_articles": 1,
+   "sent_mean": -0.6081,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-05",
+   "n_articles": 6,
+   "sent_mean": -0.2365,
+   "n_positive": 1,
+   "n_neutral": 3,
+   "n_negative": 2
+  },
+  {
+   "month": "2025-06",
+   "n_articles": 4,
+   "sent_mean": -0.091,
+   "n_positive": 0,
+   "n_neutral": 3,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-07",
+   "n_articles": 10,
+   "sent_mean": -0.1989,
+   "n_positive": 2,
+   "n_neutral": 4,
+   "n_negative": 4
+  },
+  {
+   "month": "2025-08",
+   "n_articles": 17,
+   "sent_mean": -0.1959,
+   "n_positive": 4,
+   "n_neutral": 6,
+   "n_negative": 7
+  },
+  {
+   "month": "2025-09",
+   "n_articles": 12,
+   "sent_mean": 0.0451,
+   "n_positive": 5,
+   "n_neutral": 4,
+   "n_negative": 3
+  },
+  {
+   "month": "2025-10",
+   "n_articles": 31,
+   "sent_mean": -0.2454,
+   "n_positive": 0,
+   "n_neutral": 17,
+   "n_negative": 14
+  },
+  {
+   "month": "2025-11",
+   "n_articles": 43,
+   "sent_mean": -0.1275,
+   "n_positive": 4,
+   "n_neutral": 27,
+   "n_negative": 12
+  },
+  {
+   "month": "2025-12",
+   "n_articles": 34,
+   "sent_mean": 0.0908,
+   "n_positive": 14,
+   "n_neutral": 12,
+   "n_negative": 8
+  },
+  {
+   "month": "2026-01",
+   "n_articles": 39,
+   "sent_mean": -0.1358,
+   "n_positive": 5,
+   "n_neutral": 21,
+   "n_negative": 13
+  },
+  {
+   "month": "2026-02",
+   "n_articles": 111,
+   "sent_mean": -0.1775,
+   "n_positive": 12,
+   "n_neutral": 56,
+   "n_negative": 43
+  },
+  {
+   "month": "2026-03",
+   "n_articles": 169,
+   "sent_mean": -0.2749,
+   "n_positive": 16,
+   "n_neutral": 66,
+   "n_negative": 87
+  },
+  {
+   "month": "2026-04",
+   "n_articles": 635,
+   "sent_mean": -0.2182,
+   "n_positive": 82,
+   "n_neutral": 278,
+   "n_negative": 275
+  },
+  {
+   "month": "2026-05",
+   "n_articles": 312,
+   "sent_mean": -0.2668,
+   "n_positive": 30,
+   "n_neutral": 134,
+   "n_negative": 148
+  }
+ ],
+ "global": [
+  {
+   "month": "2021-11",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2021-12",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2022-02",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-07",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-09",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2023-12",
+   "n_articles": 1,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-03",
+   "n_articles": 2,
+   "sent_mean": 0.0,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-05",
+   "n_articles": 1,
+   "sent_mean": -0.8428,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-08",
+   "n_articles": 3,
+   "sent_mean": 0.2925,
+   "n_positive": 2,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-09",
+   "n_articles": 2,
+   "sent_mean": 0.274,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 0
+  },
+  {
+   "month": "2024-10",
+   "n_articles": 3,
+   "sent_mean": 0.1611,
+   "n_positive": 1,
+   "n_neutral": 1,
+   "n_negative": 1
+  },
+  {
+   "month": "2024-11",
+   "n_articles": 3,
+   "sent_mean": -0.964,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 3
+  },
+  {
+   "month": "2025-01",
+   "n_articles": 1,
+   "sent_mean": 0.5479,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 0
+  },
+  {
+   "month": "2025-02",
+   "n_articles": 3,
+   "sent_mean": -0.3834,
+   "n_positive": 1,
+   "n_neutral": 0,
+   "n_negative": 2
+  },
+  {
+   "month": "2025-03",
+   "n_articles": 1,
+   "sent_mean": -0.4879,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-04",
+   "n_articles": 1,
+   "sent_mean": -0.6081,
+   "n_positive": 0,
+   "n_neutral": 0,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-05",
+   "n_articles": 4,
+   "sent_mean": -0.4125,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 2
+  },
+  {
+   "month": "2025-06",
+   "n_articles": 3,
+   "sent_mean": -0.1213,
+   "n_positive": 0,
+   "n_neutral": 2,
+   "n_negative": 1
+  },
+  {
+   "month": "2025-07",
+   "n_articles": 10,
+   "sent_mean": -0.1989,
+   "n_positive": 2,
+   "n_neutral": 4,
+   "n_negative": 4
+  },
+  {
+   "month": "2025-08",
+   "n_articles": 16,
+   "sent_mean": -0.2365,
+   "n_positive": 3,
+   "n_neutral": 6,
+   "n_negative": 7
+  },
+  {
+   "month": "2025-09",
+   "n_articles": 9,
+   "sent_mean": 0.0683,
+   "n_positive": 4,
+   "n_neutral": 3,
+   "n_negative": 2
+  },
+  {
+   "month": "2025-10",
+   "n_articles": 25,
+   "sent_mean": -0.2382,
+   "n_positive": 0,
+   "n_neutral": 14,
+   "n_negative": 11
+  },
+  {
+   "month": "2025-11",
+   "n_articles": 36,
+   "sent_mean": -0.1147,
+   "n_positive": 4,
+   "n_neutral": 23,
+   "n_negative": 9
+  },
+  {
+   "month": "2025-12",
+   "n_articles": 28,
+   "sent_mean": 0.1273,
+   "n_positive": 11,
+   "n_neutral": 12,
+   "n_negative": 5
+  },
+  {
+   "month": "2026-01",
+   "n_articles": 37,
+   "sent_mean": -0.1432,
+   "n_positive": 5,
+   "n_neutral": 19,
+   "n_negative": 13
+  },
+  {
+   "month": "2026-02",
+   "n_articles": 89,
+   "sent_mean": -0.1423,
+   "n_positive": 10,
+   "n_neutral": 52,
+   "n_negative": 27
+  },
+  {
+   "month": "2026-03",
+   "n_articles": 101,
+   "sent_mean": -0.1416,
+   "n_positive": 12,
+   "n_neutral": 53,
+   "n_negative": 36
+  },
+  {
+   "month": "2026-04",
+   "n_articles": 501,
+   "sent_mean": -0.1643,
+   "n_positive": 71,
+   "n_neutral": 255,
+   "n_negative": 175
+  },
+  {
+   "month": "2026-05",
+   "n_articles": 286,
+   "sent_mean": -0.2467,
+   "n_positive": 28,
+   "n_neutral": 131,
+   "n_negative": 127
+  }
+ ]
+}
