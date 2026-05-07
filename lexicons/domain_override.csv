@@ -399,3 +399,66 @@ NAVの低下,negative,ja
 強気,positive,ja
 魅力的,positive,ja
 活況を呈する,positive,ja
+shares down,negative,en
+stock down,negative,en
+down 8%,negative,en
+down 10%,negative,en
+record earnings,positive,en
+record revenue,positive,en
+record income,positive,en
+record quarter,positive,en
+beats expectations,positive,en
+beat expectations,positive,en
+beat estimates,positive,en
+beats estimates,positive,en
+tops expectations,positive,en
+missed expectations,negative,en
+misses expectations,negative,en
+missed estimates,negative,en
+misses estimates,negative,en
+better at hiding,negative,en
+interest is weakening,negative,en
+interest weakening,negative,en
+little appetite,negative,en
+finds little,negative,en
+faces mounting pressure,negative,en
+mounting pressure,negative,en
+under pressure,negative,en
+under scrutiny,negative,en
+under investigation,negative,en
+market jitters,negative,en
+industry jitters,negative,en
+discounts narrow,positive,en
+attract buyers,positive,en
+attracts buyers,positive,en
+contrarian buy,positive,en
+52-week low,negative,en
+52 week low,negative,en
+new low,negative,en
+all-time high,positive,en
+new high,positive,en
+shares slump,negative,en
+stock slumps,negative,en
+plunges after,negative,en
+sells off,negative,en
+soars after,positive,en
+surges after,positive,en
+jumps after,positive,en
+rallies after,positive,en
+dividend cut,negative,en
+cuts dividend,negative,en
+raises dividend,positive,en
+boosts dividend,positive,en
+hikes dividend,positive,en
+record high,positive,en
+mixed results,negative,en
+mixed earnings,negative,en
+mixed signals,negative,en
+flat revenue,negative,en
+flat earnings,negative,en
+strong results,positive,en
+strong earnings,positive,en
+strong quarter,positive,en
+weak results,negative,en
+weak earnings,negative,en
+weak quarter,negative,en

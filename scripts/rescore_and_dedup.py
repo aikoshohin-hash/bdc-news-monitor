@@ -68,6 +68,41 @@ def strip_source_suffix(title: str) -> str:
     return t.strip()
 
 
+def filter_non_news(articles: list[dict]) -> tuple[list[dict], int]:
+    """Remove non-news pages (fund info, stock quote pages, etc.)."""
+    # Patterns that indicate non-news content
+    non_news_patterns = [
+        r"：基準価格",
+        r"：組入銘柄",
+        r"：チャート",
+        r"：時系列",
+        r"：分配金実績",
+        r"：掲示板",
+        r"：企業情報",
+        r"：株価・株式",
+        r"：株価チャート",
+        r"【\d{7,}】",  # Fund codes like 【02311248】
+        r"FastDraft Fantasy Promo",
+        r"BDC.*Launches.*LIFT",  # Non-financial BDC
+        r"BDC.*아크셀러레이터",  # Korean BDC accelerator
+        r"BDC.*액셀러레이터",
+        r"JFA直接融資",  # Football association lending
+        r"日本公庫が中小の海外子会社に直接融資",
+        r"東日本銀行.*直接融資",
+        r"会員海外子会社に直接融資",
+    ]
+    compiled = [re.compile(p) for p in non_news_patterns]
+    kept = []
+    removed = 0
+    for a in articles:
+        title = a.get("title", "")
+        if any(p.search(title) for p in compiled):
+            removed += 1
+        else:
+            kept.append(a)
+    return kept, removed
+
+
 def run_dedup(articles: list[dict]) -> dict:
     """Cluster similar articles using Union-Find on title trigram Jaccard."""
     # Pre-compute: strip source suffixes for similarity comparison
@@ -360,38 +395,45 @@ def main():
 
     # 1. Load
     data, articles = load_articles()
-    print(f"\n[1/5] Loaded {len(articles)} articles")
+    print(f"\n[1/6] Loaded {len(articles)} articles")
     old_labels = Counter(a.get("label") for a in articles)
     print(f"  Before: {dict(old_labels)}")
 
-    # 2. Re-score with updated lexicons
+    # 2. Filter non-news pages
+    articles, n_filtered = filter_non_news(articles)
+    print(f"\n[2/6] Filtered {n_filtered} non-news pages → {len(articles)} articles")
+
+    # 3. Re-score with updated lexicons
     scorer = SentimentScorer()
     stats = rescore(articles, scorer)
     new_labels = Counter(a.get("label") for a in articles)
-    print(f"\n[2/5] Re-scored: {stats['rescored']} articles, {stats['label_changed']} label changes")
+    print(f"\n[3/6] Re-scored: {stats['rescored']} articles, {stats['label_changed']} label changes")
     print(f"  After:  {dict(new_labels)}")
 
-    # 3. Dedup
+    # 4. Dedup
     deduped, dedup_stats = run_dedup(articles)
-    print(f"\n[3/5] Dedup: {dedup_stats['total_before']} → {dedup_stats['total_after']} articles")
+    print(f"\n[4/6] Dedup: {dedup_stats['total_before']} → {dedup_stats['total_after']} articles")
     print(f"  Removed: {dedup_stats['removed']} duplicates in {dedup_stats['clusters_multi']} clusters")
     dedup_labels = Counter(a.get("label") for a in deduped)
     print(f"  Distribution: {dict(dedup_labels)}")
+    total = len(deduped)
+    for l in ['positive', 'neutral', 'negative']:
+        n = dedup_labels.get(l, 0)
+        print(f"    {l:10s}: {n:4d} ({n/total*100:.1f}%)")
 
-    # 4. Save articles JSON
+    # 5. Save articles JSON
     data["items"] = deduped
     data["generated_at"] = datetime.now(timezone.utc).isoformat()
-    with ARTICLES_JSON.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=1)
-    print(f"\n[4/5] Saved articles.json ({len(deduped)} articles)")
+    _write_json(ARTICLES_JSON, data)
+    print(f"\n[5/6] Saved articles.json ({len(deduped)} articles)")
 
-    # 5. Rebuild indices
+    # Rebuild indices
     rebuild_indices(deduped)
     print(f"  Rebuilt daily_index.json, monthly_index.json, by_entity.json")
 
     # 6. Export CSV
     export_csv(deduped)
-    print(f"\n[5/5] Done!")
+    print(f"\n[6/6] Done!")
 
 
 if __name__ == "__main__":
