@@ -50,26 +50,61 @@ else:                  → "neutral"
 
 The negative threshold is lower (more sensitive) than positive because financial journalism phrases criticism indirectly — cautionary language should tip negative rather than stay neutral.
 
-### Confidence Score
+### Confidence Score (v2 — two-component)
 
 ```
-conf_density = total_polar_hits / tokens
-confidence = min(1.0, conf_density × 10)
+signal   = min(1.0, total_polar / tokens × 8)    # polar word density
+margin   = distance from label boundary / max     # how clearly in its bucket
+confidence = signal × (0.3 + 0.7 × margin)
 ```
 
-Articles with very few polar words get low confidence, signaling that the score may be unreliable.
+- **Signal**: Do we have enough polar words to judge? (0 = no evidence)
+- **Margin**: How far from the label boundary? (positive at +0.90 → high; at +0.16 → low)
+- **Neutral**: If balanced evidence exists (pos ≈ neg), margin reflects balance rather than emptiness
+
+This replaces the v1 design (`min(1.0, density × 10)`) which gave artificially low confidence to genuinely neutral articles.
+
+### Negation Handling (v2 — expanded scope)
+
+**English:**
+- Window: 5 content tokens (articles/determiners/prepositions skipped)
+- Single-word negators: not, no, never, without, cannot, isn't, don't, won't, etc.
+- Compound negators: "does not", "is not", "has not" (auxiliary + not)
+- Scope skips: a, an, the, any, of, in, for, to, as, at, by (don't count toward distance)
+
+**Japanese:**
+- Suffix-based: ない, なし, ず, せず, ません, なく, なかった (extended from v1)
+- Lookahead: max suffix length + 2 characters after the polar word
+
+Example: "Private credit does NOT pose a systemic risk" — `NOT` is 1 content token before `risk` (skipping `pose`, `a`, `systemic`), well within the 5-token window. v1 (3-token, no skip) would miss this.
+
+### Direction-Aware Scoring (v2)
+
+Words like "down", "rise", "surge", "fall" are **context-dependent** — their polarity depends on what they modify:
+
+| Pattern | Example | Polarity |
+|---------|---------|----------|
+| bad_subject + direction_up | "defaults surge" | negative |
+| bad_subject + direction_down | "defaults down" | positive |
+| good_subject + direction_up | "earnings surge" | positive |
+| good_subject + direction_down | "shares down" | negative |
+
+41 direction words are excluded from the base lexicon and handled by a dedicated 4-token subject-lookback algorithm. Subject words are classified as:
+- **Bad subjects**: defaults, losses, risks, costs, delinquencies, spreads, leverage, etc.
+- **Good subjects**: earnings, revenue, NAV, dividends, shares, returns, margins, etc.
 
 ## Layer 1: Base Lexicons
 
 ### English — Loughran-McDonald (Extended)
 
 - **Source**: Loughran-McDonald Master Dictionary (Notre Dame SRAF), extended with BDC-specific terms
-- **Entries**: ~1,471 words with polarity (positive / negative / uncertainty)
-- **Negation handling**: 3-token lookback window for English negators (not, no, never, without, nor, neither, none)
+- **Entries**: ~1,564 words with polarity (positive / negative / uncertainty)
+- **Direction words**: 41 words handled separately (context-dependent, not in base lexicon)
+- **Negation handling**: 5-token content window with compound/contracted negators
 - **File**: `lexicons/lm_financial_en.csv`
 
 Key additions beyond standard L-M:
-- Missing common negative words: cut, cuts, risk, risks, slump, sink, crash, dip, trouble, strain, peril, slash, trim, halve, erode, headwind, exodus, redemption, downgrade, bubble, opaque, illiquid, squeeze, etc.
+- Common financial words: earnings, beat, buy, sell, pressure, jitters, bearish, scrutiny, probe, etc.
 - "despite" reclassified from positive → uncertainty (it appears in hedging headlines)
 
 ### Japanese — Custom Financial Polarity
@@ -148,10 +183,19 @@ Only cluster representatives appear in the dashboard. The `cluster_size` badge s
 
 ### Known Limitations
 
-- **Title-only scoring**: Many articles only have titles (no body text), so scoring relies on headline vocabulary
-- **Short text sensitivity**: Very short titles may not contain enough polar words for reliable scoring
-- **Context-free**: The lexicon approach cannot capture sarcasm, conditional statements, or complex argumentation
-- **JP particle effects**: Japanese dedup uses character trigrams which are affected by particles (は, が, の, を) — threshold is set lower (0.45) to account for this
+- **Title-only scoring**: Many articles only have titles (no body text), so scoring relies on headline vocabulary. ~37% of articles score exactly 0.000 (no polar words detected).
+- **Short text sensitivity**: Very short titles may not contain enough polar words for reliable scoring.
+- **Negation scope**: While significantly improved in v2 (5-token window, compound negators), complex multi-clause negation ("While risks remain, the outlook is not as dire as feared") can still be misparsed. Full dependency parsing (spaCy/ginza) would improve this further.
+- **Direction ambiguity**: The subject-lookback algorithm handles most cases but can fail on unusual word order or when the subject is >4 tokens away from the direction word.
+- **JP token estimation**: `len(text) // 2` is a rough proxy for word count. MeCab/Sudachi would provide accurate tokenization but adds a dependency.
+- **No inter-annotator agreement**: Current validation relies on single-reviewer assessment. A 200-300 article test set with Cohen's κ ≥ 0.7 is recommended for production quality assurance.
+
+### Future Improvements (P1/P2 from expert panel)
+
+- **Cascade design**: Dictionary as first-pass filter → claude-haiku-4-5 for context judgment on polar articles. Estimated cost: ~200 JPY/month for 1500 articles.
+- **FinBERT/JP-BERT ensemble**: Transformer model scores blended with dictionary scores for context robustness while maintaining determinism.
+- **Event tag extraction**: Formalize credit events (dividend cut, non-accrual, downgrade) as structured classifiers beyond sentiment.
+- **Source authority weighting**: Bloomberg > Nikkei > Regional news for cluster representative selection.
 
 ## Files Reference
 
@@ -171,6 +215,7 @@ Only cluster representatives appear in the dashboard. The `cluster_size` badge s
 
 | Date | Change |
 |------|--------|
-| 2026-05-07 | Major JP lexicon expansion: +70 words, +80 domain phrases, +30 BDC overlay rules. Dedup implemented. Distribution shift: positive 12.9%, neutral 45.2%, negative 41.9% |
+| 2026-05-07 (v2) | **P0 scoring overhaul** per expert panel: negation scope 3→5 tokens with compound/contracted negators and article-skipping; direction-aware scoring (41 words context-dependent); confidence redesigned to signal×margin; 70+ negation/direction domain overrides. All 14 expert failure cases now correct. |
+| 2026-05-07 (v1) | Major JP lexicon expansion: +70 words, +80 domain phrases, +30 BDC overlay rules. EN lexicon +134 words. Non-news filter. Dedup on JSON. |
 | 2026-05-06 | Expert review and scoring overhaul: SCALE 6→8, UNC_NEG_WEIGHT 0.3→0.5, L-M dictionary +142 words, asymmetric thresholds |
 | 2026-05-05 | Initial scoring system with L-M dictionary and basic JP lexicon |
