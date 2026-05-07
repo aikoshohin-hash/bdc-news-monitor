@@ -39,10 +39,16 @@ def _write(path: Path, obj) -> None:
 def export_articles() -> int:
     items: list[dict] = []
     with get_session() as s:
+        # Only export cluster representatives (is_cluster_rep=1) or
+        # articles that haven't been clustered yet (cluster_id IS NULL).
+        # This eliminates near-duplicate articles from the dashboard.
         rows = s.execute(
             select(Article, ArticleScore)
             .outerjoin(ArticleScore, ArticleScore.article_id == Article.id)
             .where(Article.is_relevant == 1)
+            .where(
+                (Article.is_cluster_rep == 1) | (Article.cluster_id.is_(None))
+            )
             .order_by(Article.published_at.desc())
         ).all()
         for art, sc in rows:
@@ -62,6 +68,7 @@ def export_articles() -> int:
                     "event_tags": _decode_tag_list(sc.event_tags if sc else None),
                     "event_sub_tags": _decode_tag_list(sc.event_sub_tags if sc else None),
                     "event_severity": (sc.event_severity if sc else None),
+                    "cluster_size": art.cluster_size or 1,
                 }
             )
     _write(DOCS_DATA_DIR / "articles.json", {"generated_at": _now(), "items": items})

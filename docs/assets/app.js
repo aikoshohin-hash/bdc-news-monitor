@@ -735,6 +735,7 @@
           <td>${renderEventBadges(a)}</td>
           <td>${a.label ? `<span class="label-pill ${a.label}">${a.label}</span>` : "—"}</td>
           <td>${a.sentiment == null ? "—" : a.sentiment.toFixed(3)}</td>
+          <td>${(a.cluster_size || 1) > 1 ? `<span class="label-pill neutral" title="${a.cluster_size}件の類似記事を統合">${a.cluster_size}件</span>` : ""}</td>
         </tr>`
       )
       .join("");

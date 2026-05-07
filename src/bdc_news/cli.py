@@ -247,6 +247,31 @@ def export() -> None:
     typer.echo(f"export done: {stats}")
 
 
+@app.command()
+def dedup(
+    recluster: bool = typer.Option(False, help="Re-cluster all articles (ignore existing clusters)"),
+    threshold: float = typer.Option(0.45, help="Jaccard similarity threshold (0.0-1.0)"),
+) -> None:
+    """Detect and merge near-duplicate articles.
+
+    Uses character trigram Jaccard similarity within a ±1 day window.
+    Marks the most informative article as the cluster representative;
+    duplicates are hidden from dashboard export.
+    """
+    _setup_logging()
+    init_db()
+    from bdc_news.pipeline.dedup import run_dedup, SIM_THRESHOLD
+    import bdc_news.pipeline.dedup as dedup_mod
+    # Allow CLI override of threshold
+    if threshold != SIM_THRESHOLD:
+        dedup_mod.SIM_THRESHOLD = threshold
+    stats = run_dedup(only_unclustered=not recluster)
+    typer.echo(
+        f"dedup done: total={stats['total']} clusters={stats['clusters']} "
+        f"duplicates={stats['duplicates']} singletons={stats['singletons']}"
+    )
+
+
 @app.command("check-alerts")
 def check_alerts(
     dry_run: bool = typer.Option(False, help="Evaluate rules but do not send notifications"),
@@ -271,10 +296,11 @@ def check_alerts(
 
 @app.command("run-all")
 def run_all() -> None:
-    """Collect → classify → score → tag-events → edgar-metrics → prices → export → alerts."""
+    """Collect → classify → score → dedup → tag-events → edgar-metrics → prices → export → alerts."""
     collect()
     classify()
     score()
+    dedup()
     tag_events()
     edgar_metrics()
     prices()

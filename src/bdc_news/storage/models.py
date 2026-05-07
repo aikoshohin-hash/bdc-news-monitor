@@ -39,6 +39,11 @@ class Article(Base):
     content_hash = Column(String(32), index=True)
     is_relevant = Column(Integer, default=0, index=True)
     relevance_rule = Column(String(64))
+    # Deduplication: articles about the same event share a cluster_id.
+    # The representative article has is_cluster_rep=1; duplicates have 0.
+    cluster_id = Column(String(36), index=True)
+    is_cluster_rep = Column(Integer, default=1)  # 1=representative, 0=duplicate
+    cluster_size = Column(Integer, default=1)  # how many articles in this cluster
 
     scores = relationship("ArticleScore", back_populates="article", cascade="all, delete-orphan")
     entities = relationship("ArticleEntity", back_populates="article", cascade="all, delete-orphan")
