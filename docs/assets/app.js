@@ -450,32 +450,38 @@
       plotlyConfig
     );
 
+    // Smooth pos/neg ratios with 7-point moving average to reduce spikiness
+    const SMOOTH_W = 7;
+    const posSmooth = ma(rows.map((r) => r.pos_ratio), SMOOTH_W);
+    const negSmooth = ma(rows.map((r) => r.neg_ratio), SMOOTH_W);
+    const neuSmooth = posSmooth.map((p, i) => Math.max(0, 1 - p - negSmooth[i]));
+
     Plotly.newPlot(
       "chart-posneg",
       [
         {
           x,
-          y: rows.map((r) => r.pos_ratio),
+          y: posSmooth,
           name: "positive",
           type: "scatter",
           stackgroup: "one",
-          line: { color: "#3fb950" },
+          line: { color: "#3fb950", shape: "spline" },
         },
         {
           x,
-          y: rows.map((r) => 1 - r.pos_ratio - r.neg_ratio),
+          y: neuSmooth,
           name: "neutral",
           type: "scatter",
           stackgroup: "one",
-          line: { color: "#8b949e" },
+          line: { color: "#8b949e", shape: "spline" },
         },
         {
           x,
-          y: rows.map((r) => r.neg_ratio),
+          y: negSmooth,
           name: "negative",
           type: "scatter",
           stackgroup: "one",
-          line: { color: "#f85149" },
+          line: { color: "#f85149", shape: "spline" },
         },
       ],
       {
