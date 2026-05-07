@@ -462,3 +462,73 @@ strong quarter,positive,en
 weak results,negative,en
 weak earnings,negative,en
 weak quarter,negative,en
+not a systemic risk,positive,en
+not systemic risk,positive,en
+does not pose systemic risk,positive,en
+does not pose a systemic risk,positive,en
+does not pose risk,positive,en
+not derailed,positive,en
+not deterioration,positive,en
+not deteriorating,positive,en
+no systemic risk,positive,en
+no risk of contagion,positive,en
+no contagion,positive,en
+not a risk,positive,en
+affirm private credit,positive,en
+affirm no risk,positive,en
+not pose risk,positive,en
+defaults down,positive,en
+defaults fall,positive,en
+defaults fell,positive,en
+defaults decline,positive,en
+defaults declining,positive,en
+defaults decrease,positive,en
+defaults drop,positive,en
+default rate down,positive,en
+default rate falls,positive,en
+default rate fell,positive,en
+default rate declining,positive,en
+losses down,positive,en
+losses decline,positive,en
+losses fell,positive,en
+risks ease,positive,en
+risks easing,positive,en
+risks recede,positive,en
+risks subside,positive,en
+fears subside,positive,en
+fears ease,positive,en
+concerns ease,positive,en
+concerns subside,positive,en
+concerns abate,positive,en
+jitters fade,positive,en
+jitters ease,positive,en
+outflows slow,positive,en
+outflows decline,positive,en
+redemptions decline,positive,en
+redemptions slow,positive,en
+volatility declines,positive,en
+volatility eases,positive,en
+delinquencies fall,positive,en
+delinquencies decline,positive,en
+spreads narrow,positive,en
+spreads tighten,positive,en
+金融システムに波及せず,positive,ja
+波及せず,positive,ja
+リスクなし,positive,ja
+リスクはない,positive,ja
+リスクではない,positive,ja
+システミックリスクではない,positive,ja
+損失想定せず,positive,ja
+まとまった損失想定せず,positive,ja
+損失はない,positive,ja
+懸念なし,positive,ja
+懸念はない,positive,ja
+問題なし,positive,ja
+問題はない,positive,ja
+心配せず,positive,ja
+心配なし,positive,ja
+影響なし,positive,ja
+影響はない,positive,ja
+影響は限定的,positive,ja
+リスクは限定的,positive,ja
+保有限定的,positive,ja

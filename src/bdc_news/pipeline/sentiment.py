@@ -5,6 +5,18 @@
 - Phrase-level overrides for both (lexicons/domain_override.csv)
 
 No external API calls. Deterministic. Runs in milliseconds.
+
+== P0 improvements (2026-05-07 expert panel feedback) ==
+- Negation scope: expanded from 3-token lookback to 5-token with skip-
+  articles, compound negators ("does not", "is not"), and contracted
+  forms ("isn't", "don't", "won't").
+- Direction-aware scoring: words like "down", "rise", "surge" are
+  classified as *directional* rather than unconditionally polar.
+  When preceded by a negative-polarity word (defaults, losses, risks),
+  the direction is inverted (e.g., "defaults down" → positive).
+- Confidence redesign: two-component (signal strength × decision
+  margin) instead of raw polar density.
+- JP: negation scope extended with broader suffix detection.
 """
 from __future__ import annotations
 
@@ -44,7 +56,60 @@ NEG = {"negative"}
 UNC = {"uncertainty", "uncertain"}
 
 _EN_TOKEN = re.compile(r"[A-Za-z][A-Za-z\-']+")
-_NEGATORS_EN = {"not", "no", "never", "without", "nor", "neither", "none"}
+
+# ── Negation handling (EN) ──────────────────────────────────────────
+# Single-word negators
+_NEGATORS_EN = {"not", "no", "never", "without", "nor", "neither", "none",
+                "cannot", "can't", "isn't", "aren't", "wasn't", "weren't",
+                "doesn't", "don't", "didn't", "won't", "wouldn't", "shouldn't",
+                "couldn't", "hasn't", "haven't", "hadn't"}
+
+# Auxiliary verbs that form compound negation with "not" (detected as pairs)
+_AUX_BEFORE_NOT = {"does", "do", "did", "is", "are", "was", "were",
+                    "has", "have", "had", "will", "would", "should", "could"}
+
+# Articles/determiners/prepositions to skip when counting negation distance
+_SKIP_TOKENS = {"a", "an", "the", "any", "its", "their", "our", "his", "her",
+                "of", "in", "for", "to", "as", "at", "by", "on", "with", "from"}
+
+# Negation scope: up to this many *content* tokens (skipping articles)
+_NEG_WINDOW = 5
+
+# ── Direction-aware words ───────────────────────────────────────────
+# These words' polarity depends on what they modify:
+#   "earnings rise" = positive (good thing going up)
+#   "defaults rise" = negative (bad thing going up)
+#   "defaults down" = positive (bad thing going down)
+#   "shares down"   = negative (good thing going down)
+_DIRECTION_UP = {"rise", "rises", "rising", "rose", "surge", "surges",
+                 "surged", "surging", "jump", "jumped", "jumping", "jumps",
+                 "soar", "soared", "soaring", "spike", "spiked", "spiking",
+                 "climb", "climbed", "climbing", "increase", "increased",
+                 "increasing", "up", "higher", "high", "record"}
+_DIRECTION_DOWN = {"down", "fall", "falls", "falling", "fell",
+                   "decline", "declined", "declining", "declines",
+                   "drop", "dropped", "dropping", "drops",
+                   "sink", "sinks", "sinking", "sank", "sunk",
+                   "lower", "low", "dip", "dipped", "dipping"}
+
+# Words whose meaning determines how direction words are interpreted:
+# If a "bad" word precedes a direction word, the direction flips
+_BAD_SUBJECTS = {"default", "defaults", "loss", "losses", "deficit", "deficits",
+                 "risk", "risks", "cost", "costs", "debt", "delinquency",
+                 "delinquencies", "non-accrual", "nonaccrual", "non-accruals",
+                 "nonaccruals", "failure", "failures", "bankruptcy",
+                 "bankruptcies", "charge-off", "charge-offs", "writedown",
+                 "writedowns", "write-down", "write-downs", "impairment",
+                 "impairments", "outflows", "redemptions", "volatility",
+                 "spread", "spreads", "vacancy", "vacancies", "unemployment",
+                 "inflation", "leverage"}
+
+_GOOD_SUBJECTS = {"earnings", "revenue", "profit", "profits", "income",
+                  "dividend", "dividends", "nav", "coverage", "aum",
+                  "deployment", "origination", "originations", "yield",
+                  "recovery", "book", "shares", "stock", "price", "prices",
+                  "value", "values", "return", "returns", "margin", "margins",
+                  "growth", "asset", "assets", "inflows"}
 
 
 def _load_csv(path: Path) -> list[dict]:
@@ -62,11 +127,21 @@ class SentimentScorer:
     def __init__(self, lexicon_dir: Path | None = None):
         base = Path(lexicon_dir) if lexicon_dir else LEXICON_DIR
         self.en_lex: dict[str, str] = {}
+        # Track which words are directional (loaded from lexicon but
+        # handled via context-aware logic, not simple polar counting)
+        self._direction_up_lex: set[str] = set()
+        self._direction_down_lex: set[str] = set()
         for row in _load_csv(base / "lm_financial_en.csv"):
             w = (row.get("word") or "").strip().lower()
             pol = (row.get("polarity") or "").strip().lower()
             if w and pol:
-                self.en_lex[w] = pol
+                # Classify direction-ambiguous words separately
+                if w in _DIRECTION_UP:
+                    self._direction_up_lex.add(w)
+                elif w in _DIRECTION_DOWN:
+                    self._direction_down_lex.add(w)
+                else:
+                    self.en_lex[w] = pol
         self.ja_lex: dict[str, str] = {}
         for row in _load_csv(base / "ja_financial_polarity.csv"):
             w = (row.get("word") or "").strip()
@@ -89,8 +164,11 @@ class SentimentScorer:
         # Issue #4: BDC domain overlay (final-stage polarity adjustment)
         self.bdc_overlay = BdcOverrideOverlay.from_yaml()
         log.info(
-            "SentimentScorer loaded: EN=%d, JA=%d, overrides=%d, oseti=%s, bdc_overlay=%d",
+            "SentimentScorer loaded: EN=%d (+%d dir_up, +%d dir_down), "
+            "JA=%d, overrides=%d, oseti=%s, bdc_overlay=%d",
             len(self.en_lex),
+            len(self._direction_up_lex),
+            len(self._direction_down_lex),
             len(self.ja_lex),
             len(self.overrides),
             bool(self._oseti),
@@ -102,14 +180,75 @@ class SentimentScorer:
     def _score_en(self, text: str) -> Score:
         tokens = [t.lower() for t in _EN_TOKEN.findall(text or "")]
         pos = neg = unc = 0
-        # Negation-aware scan over a sliding window of 3 tokens
+
+        # ── Pass 1: Direction-aware scoring ──
+        # For direction words (up/down/rise/fall/surge etc.), determine
+        # polarity from the subject they modify (look back for context).
         for i, tok in enumerate(tokens):
+            is_dir_up = tok in self._direction_up_lex
+            is_dir_down = tok in self._direction_down_lex
+            if is_dir_up or is_dir_down:
+                # Look backward up to 4 tokens for subject context
+                context_tokens = tokens[max(0, i - 4) : i]
+                context_set = set(context_tokens)
+
+                # Check: is negated?
+                negated = self._is_negated_en(tokens, i)
+
+                has_bad_subject = bool(context_set & _BAD_SUBJECTS)
+                has_good_subject = bool(context_set & _GOOD_SUBJECTS)
+
+                if has_bad_subject and not has_good_subject:
+                    # Bad thing going up = negative; bad thing going down = positive
+                    if is_dir_up:
+                        if negated:
+                            pos += 1
+                        else:
+                            neg += 1
+                    else:  # dir_down
+                        if negated:
+                            neg += 1
+                        else:
+                            pos += 1
+                elif has_good_subject and not has_bad_subject:
+                    # Good thing going up = positive; good thing going down = negative
+                    if is_dir_up:
+                        if negated:
+                            neg += 1
+                        else:
+                            pos += 1
+                    else:  # dir_down
+                        if negated:
+                            pos += 1
+                        else:
+                            neg += 1
+                else:
+                    # Ambiguous context — use default polarity
+                    # Direction-up words default to positive, down to negative
+                    if is_dir_up:
+                        if negated:
+                            neg += 1
+                        else:
+                            pos += 1
+                    else:
+                        if negated:
+                            pos += 1
+                        else:
+                            neg += 1
+                continue  # don't re-process in pass 2
+
+        # ── Pass 2: Standard lexicon scoring with improved negation ──
+        for i, tok in enumerate(tokens):
+            # Skip direction words (already handled in pass 1)
+            if tok in self._direction_up_lex or tok in self._direction_down_lex:
+                continue
+
             pol = self.en_lex.get(tok)
             if pol is None:
                 continue
-            # Check 3 tokens to the left for a negator
-            window = tokens[max(0, i - 3) : i]
-            negated = any(w in _NEGATORS_EN for w in window)
+
+            negated = self._is_negated_en(tokens, i)
+
             if pol in POS:
                 if negated:
                     neg += 1
@@ -122,27 +261,61 @@ class SentimentScorer:
                     neg += 1
             elif pol in UNC:
                 unc += 1
-        return self._to_score(text, tokens_n=len(tokens), pos=pos, neg=neg, unc=unc, model="lm-dict-v1")
+
+        return self._to_score(text, tokens_n=len(tokens), pos=pos, neg=neg, unc=unc, model="lm-dict-v2")
+
+    @staticmethod
+    def _is_negated_en(tokens: list[str], idx: int) -> bool:
+        """Check if token at `idx` is within negation scope.
+
+        Improvements over the original 3-token window:
+        1. Window expanded to 5 content tokens (articles/determiners skipped)
+        2. Compound negators: "does not", "is not", "has not" detected
+        3. Contracted negators: "isn't", "don't", "won't" etc.
+        """
+        # Scan backward up to _NEG_WINDOW content tokens
+        content_distance = 0
+        j = idx - 1
+        while j >= 0 and content_distance < _NEG_WINDOW:
+            w = tokens[j]
+            if w in _SKIP_TOKENS:
+                j -= 1
+                continue  # don't count articles toward distance
+            if w in _NEGATORS_EN:
+                return True
+            if w == "not":
+                return True
+            # Check for compound negation: "does/is/has" + "not"
+            if w in _AUX_BEFORE_NOT and j + 1 < len(tokens) and tokens[j + 1] == "not":
+                return True
+            content_distance += 1
+            j -= 1
+        return False
 
     # ---------------------------------------------------------------- Japanese
 
     def _score_ja(self, text: str) -> Score:
         pos = neg = unc = 0
+
+        # Japanese negation suffixes — extended set
+        _JP_NEG_SUFFIXES = ("ない", "なし", "ず", "無し", "ぬ", "ません",
+                            "せず", "ずに", "なく", "なかった")
+        _JP_NEG_LOOKAHEAD = max(len(s) for s in _JP_NEG_SUFFIXES) + 2  # chars
+
         for word, pol in self.ja_lex.items():
             # count non-overlapping occurrences
             n = text.count(word) if word else 0
             if n <= 0:
                 continue
-            # Simple negation for common JP patterns directly after the word
-            # (e.g., "増加しない" → "増加" + "ない" → flip)
+            # Negation detection: check for negation suffix after the word
             flipped_n = 0
             idx = 0
             while True:
                 idx = text.find(word, idx)
                 if idx < 0:
                     break
-                nxt = text[idx + len(word) : idx + len(word) + 4]
-                if any(neg_suffix in nxt for neg_suffix in ("ない", "なし", "ず", "無し", "ぬ")):
+                nxt = text[idx + len(word) : idx + len(word) + _JP_NEG_LOOKAHEAD]
+                if any(neg_suffix in nxt for neg_suffix in _JP_NEG_SUFFIXES):
                     flipped_n += 1
                 idx += len(word)
             plain_n = n - flipped_n
@@ -169,7 +342,7 @@ class SentimentScorer:
 
         # Token estimate for JP: approximate by character count / 2
         token_est = max(1, len(text) // 2)
-        return self._to_score(text, tokens_n=token_est, pos=pos, neg=neg, unc=unc, model="ja-lex-v1")
+        return self._to_score(text, tokens_n=token_est, pos=pos, neg=neg, unc=unc, model="ja-lex-v2")
 
     # ----------------------------------------------------------------- Combine
 
@@ -244,27 +417,8 @@ class SentimentScorer:
         override: bool = False,
     ) -> Score:
         # --- tanh-smoothed scoring ---
-        # Old formula: (pos-neg)/(pos+neg) produced discrete ratios like
-        # 0.0, ±0.33, ±0.5, ±1.0 — no granularity.
-        #
-        # New: normalise by TOTAL tokens (not just polar ones) so that
-        # "3 pos hits in a 50-word snippet" and "3 pos hits in a 10-word
-        # title" yield different scores. Then pass through tanh for a
-        # smooth S-curve in [-1, 1].
-        #
-        #   raw = (pos - neg) / tokens_n        direction + density
-        #   sentiment = tanh(raw * SCALE)        S-curve [-1, 1]
-        #
-        # SCALE = 6 → 3 net-pos in 20 tokens  ≈ tanh(0.9) ≈ 0.72
-        #            1 net-pos in 20 tokens  ≈ tanh(0.3) ≈ 0.29
-        #            5 net-pos in 10 tokens  ≈ tanh(3.0) ≈ 0.995
         SCALE = 8.0
-        # Uncertainty words carry negative bias (0.5× each):
-        # financial journalism uses hedging language ("risk", "concern",
-        # "uncertainty", "リスク", "懸念") to soften criticism. A 0.5×
-        # weight ensures cautionary tone pushes the score negative rather
-        # than staying neutral. Expert review of 1901 articles confirmed
-        # that ~60% of "neutral" articles had clear negative undertone.
+        # Uncertainty words carry negative bias (0.5× each)
         UNC_NEG_WEIGHT = 0.5
         effective_neg = neg + unc * UNC_NEG_WEIGHT
         total_pol = pos + neg + unc
@@ -274,8 +428,32 @@ class SentimentScorer:
             raw = (pos - effective_neg) / max(tokens_n, 1)
             sentiment = math.tanh(raw * SCALE)
         label = _label_for(sentiment, total_pol)
-        conf_density = total_pol / max(tokens_n, 1)
-        confidence = 0.0 if conf_density < 0.01 else min(1.0, conf_density * 10)
+
+        # ── Confidence: signal strength × decision clarity ──
+        # Component 1: Signal density (do we have enough polar words?)
+        if total_pol == 0:
+            conf_signal = 0.0
+        else:
+            conf_signal = min(1.0, total_pol / max(tokens_n, 1) * 8)
+
+        # Component 2: Decision margin (how clearly does score fall
+        # into its label? Higher when far from label boundary.)
+        if label == "positive":
+            # Distance from positive threshold (0.15) to max (1.0)
+            conf_margin = min(1.0, max(0.0, (sentiment - 0.15) / 0.85))
+        elif label == "negative":
+            # Distance from negative threshold (-0.10) to min (-1.0)
+            conf_margin = min(1.0, max(0.0, (-0.10 - sentiment) / 0.90))
+        else:
+            # For neutral: confident when close to center, less at edges
+            if total_pol == 0:
+                conf_margin = 0.5  # No signal → moderate (we just don't know)
+            else:
+                # Balanced polar words → genuinely neutral → higher margin
+                conf_margin = max(0.0, 1.0 - abs(sentiment) / 0.15)
+
+        confidence = conf_signal * (0.3 + 0.7 * conf_margin)
+
         return Score(
             sentiment=round(sentiment, 4),
             label=label,
@@ -299,8 +477,6 @@ def _label_for(sentiment: float, total_hits: int) -> str:
         return "neutral"
     # Asymmetric thresholds: lower bar for negative to catch
     # cautionary / critical tone that raw scoring tends to under-weight.
-    # Rationale: financial journalism phrases criticism indirectly
-    # ("懸念", "リスク", "不透明") — these should tip negative, not stay neutral.
     if sentiment > 0.15:
         return "positive"
     if sentiment < -0.10:
