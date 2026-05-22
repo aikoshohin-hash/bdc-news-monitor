@@ -16,12 +16,12 @@
 
   const plotlyConfig = { displayModeBar: false, responsive: true };
   const plotlyLayoutBase = {
-    paper_bgcolor: "#161b22",
-    plot_bgcolor: "#161b22",
-    font: { color: "#e6edf3", size: 11 },
+    paper_bgcolor: "#f6f8fa",
+    plot_bgcolor: "#ffffff",
+    font: { color: "#1f2328", size: 11 },
     margin: { l: 48, r: 32, t: 24, b: 40 },
-    xaxis: { gridcolor: "#222a33" },
-    yaxis: { gridcolor: "#222a33" },
+    xaxis: { gridcolor: "#d1d9e0" },
+    yaxis: { gridcolor: "#d1d9e0" },
     legend: { orientation: "h", y: -0.18 },
   };
 
@@ -414,7 +414,7 @@
           x,
           y: rows.map((r) => r.n_articles),
           type: "bar",
-          marker: { color: "#58a6ff" },
+          marker: { color: "#0969da" },
           name: "件数",
         },
       ],
@@ -433,7 +433,7 @@
           y: isPeerRel ? ma(rows.map((r) => r.sent_weighted), 30) : rows.map((r) => r.sent_weighted),
           type: "scatter",
           mode: "lines+markers",
-          line: { color: "#e6edf3", width: 2 },
+          line: { color: "#1f2328", width: 2 },
           marker: { size: 4 },
           name: isPeerRel ? "z-score (30d MA)" : "センチメント指数",
         },
@@ -445,7 +445,7 @@
           title: isPeerRel ? "z-score" : "index",
           range: isPeerRel ? [-3, 3] : [-1, 1],
           zeroline: true,
-          zerolinecolor: "#444",
+          zerolinecolor: "#aaa",
         },
       },
       plotlyConfig
@@ -466,7 +466,7 @@
           name: "positive",
           type: "scatter",
           stackgroup: "one",
-          line: { color: "#3fb950", shape: "spline" },
+          line: { color: "#1a7f37", shape: "spline" },
         },
         {
           x,
@@ -474,7 +474,7 @@
           name: "neutral",
           type: "scatter",
           stackgroup: "one",
-          line: { color: "#8b949e", shape: "spline" },
+          line: { color: "#656d76", shape: "spline" },
         },
         {
           x,
@@ -482,7 +482,7 @@
           name: "negative",
           type: "scatter",
           stackgroup: "one",
-          line: { color: "#f85149", shape: "spline" },
+          line: { color: "#cf222e", shape: "spline" },
         },
       ],
       {
@@ -492,7 +492,52 @@
       plotlyConfig
     );
 
+    // ---- JP pos/neg ratio (always shows JP regardless of region selector) ----
+    renderJpPosNeg();
+
     renderOverlayChart();
+  }
+
+  function renderJpPosNeg() {
+    const range = document.getElementById("range-select").value;
+    const freq = document.getElementById("freq-select").value;
+    const cutoff = rangeCutoff(range);
+    let jpRows = state.daily.filter((r) => r.region === "jp");
+    if (cutoff) jpRows = jpRows.filter((r) => r.date >= cutoff);
+    jpRows.sort((a, b) => a.date.localeCompare(b.date));
+    if (freq !== "D") jpRows = rollup(jpRows, freq);
+
+    const xJp = jpRows.map((r) => r.date);
+    const SW = 7;
+    const jpPos = ma(jpRows.map((r) => r.pos_ratio), SW);
+    const jpNeg = ma(jpRows.map((r) => r.neg_ratio), SW);
+    const jpNeu = jpPos.map((p, i) => Math.max(0, 1 - p - jpNeg[i]));
+
+    Plotly.newPlot(
+      "chart-posneg-jp",
+      [
+        {
+          x: xJp, y: jpPos, name: "positive",
+          type: "scatter", stackgroup: "one",
+          line: { color: "#1a7f37", shape: "spline" },
+        },
+        {
+          x: xJp, y: jpNeu, name: "neutral",
+          type: "scatter", stackgroup: "one",
+          line: { color: "#656d76", shape: "spline" },
+        },
+        {
+          x: xJp, y: jpNeg, name: "negative",
+          type: "scatter", stackgroup: "one",
+          line: { color: "#cf222e", shape: "spline" },
+        },
+      ],
+      {
+        ...plotlyLayoutBase,
+        yaxis: { ...plotlyLayoutBase.yaxis, title: "ratio", range: [0, 1] },
+      },
+      plotlyConfig
+    );
   }
 
   // ---------------------------------------------------------- overlay chart
@@ -511,7 +556,7 @@
       yaxis: "y",
       type: "scatter",
       mode: "lines",
-      line: { color: "#58a6ff", width: 2 },
+      line: { color: "#0969da", width: 2 },
     });
 
     for (const sym of selected) {
@@ -957,7 +1002,7 @@
         yaxis: "y",
         type: "scatter",
         mode: "markers",
-        marker: { color: "#58a6ff", size: 5 },
+        marker: { color: "#0969da", size: 5 },
       });
     }
     if (priceSeries.length) {
@@ -968,13 +1013,13 @@
         yaxis: "y2",
         type: "scatter",
         mode: "lines",
-        line: { color: "#3fb950", width: 1.5 },
+        line: { color: "#1a7f37", width: 1.5 },
       });
     }
     const layout = {
       ...plotlyLayoutBase,
       xaxis: { ...plotlyLayoutBase.xaxis },
-      yaxis: { ...plotlyLayoutBase.yaxis, title: "sentiment", range: [-1, 1], zeroline: true, zerolinecolor: "#444" },
+      yaxis: { ...plotlyLayoutBase.yaxis, title: "sentiment", range: [-1, 1], zeroline: true, zerolinecolor: "#aaa" },
       yaxis2: { title: "price ($)", overlaying: "y", side: "right", gridcolor: "#222a33" },
       legend: { orientation: "h", y: -0.2 },
     };

@@ -31,6 +31,7 @@ class BdcOverrideRule:
     polarity: float
     lang: str = "en"
     context_required: tuple[str, ...] = field(default_factory=tuple)
+    context_excluded: tuple[str, ...] = field(default_factory=tuple)
     rationale: str = ""
 
     def matches(self, text: str, lang: str) -> bool:
@@ -49,6 +50,16 @@ class BdcOverrideRule:
                 else tuple(c.lower() for c in self.context_required)
             )
             if not any(c in ctx_hay for c in ctx_terms):
+                return False
+        # context_excluded: rule does NOT fire when any excluded term appears
+        if self.context_excluded:
+            ctx_hay = haystack if self.lang.startswith("ja") else haystack.lower()
+            ctx_terms = (
+                self.context_excluded
+                if self.lang.startswith("ja")
+                else tuple(c.lower() for c in self.context_excluded)
+            )
+            if any(c in ctx_hay for c in ctx_terms):
                 return False
         return True
 
@@ -82,6 +93,7 @@ class BdcOverrideOverlay:
                         polarity=float(raw.get("polarity", 0.0)),
                         lang=str(raw.get("lang", "en")),
                         context_required=tuple(raw.get("context_required") or ()),
+                        context_excluded=tuple(raw.get("context_excluded") or ()),
                         rationale=str(raw.get("rationale", "")),
                     )
                 )

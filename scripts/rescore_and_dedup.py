@@ -45,7 +45,17 @@ def rescore(articles: list[dict], scorer: SentimentScorer) -> dict:
     """Re-score all articles. Returns stats."""
     changes = {"rescored": 0, "label_changed": 0}
     for a in articles:
-        text = f"{a.get('title', '')}\n{a.get('snippet', '')}"
+        title = a.get("title", "") or ""
+        snippet = a.get("snippet", "") or ""
+        # Avoid double-counting when snippet ≈ title (common with RSS feeds)
+        # Strip HTML entities and compare core text
+        snip_clean = re.sub(r"&\w+;", "", snippet).strip()
+        title_clean = re.sub(r"\s+", "", title)
+        snip_core = re.sub(r"\s+", "", snip_clean)
+        if snip_core and title_clean and (snip_core in title_clean or title_clean in snip_core):
+            text = title  # snippet is redundant
+        else:
+            text = f"{title}\n{snippet}"
         lang = a.get("language", "en") or "en"
         sc = scorer.score(text, lang)
         old_label = a.get("label")

@@ -282,11 +282,13 @@ rules:
     polarity: -0.45
     lang: ja
     rationale: "金融システム全体へのリスク波及"
+    context_excluded: ["見られず", "ない", "なし", "ではない", "せず", "リスクなし", "リスクではない", "リスクはない", "not"]
 
   - pattern: "システミック"
     polarity: -0.35
     lang: ja
     rationale: "システミックリスク言及"
+    context_excluded: ["見られず", "ない", "なし", "ではない", "せず", "リスクなし", "リスクではない", "リスクはない", "not"]
 
   - pattern: "急拡大"
     polarity: -0.15
@@ -295,9 +297,9 @@ rules:
     context_required: ["リスク", "懸念", "問題", "警戒", "注意", "危険", "警鐘"]
 
   - pattern: "解約制限"
-    polarity: -0.35
+    polarity: -0.55
     lang: ja
-    rationale: "投資家ロックアウト＝流動性危機"
+    rationale: "gating発動はリテール向けPCファンドにとって最大級の警告シグナル"
 
   - pattern: "ゲート条項"
     polarity: -0.30
@@ -388,9 +390,9 @@ rules:
     rationale: "ネガティブな市場反応"
 
   - pattern: "取り付け騒ぎ"
-    polarity: -0.50
+    polarity: -0.70
     lang: ja
-    rationale: "パニック売り・流動性危機"
+    rationale: "bank run。リテールPC最大の危機シグナル"
 
   - pattern: "正念場"
     polarity: -0.30
@@ -411,6 +413,7 @@ rules:
     polarity: -0.35
     lang: ja
     rationale: "市場構造の破綻兆候"
+    context_excluded: ["見当たらず", "見られず", "ない", "なし"]
 
   - pattern: "不穏"
     polarity: -0.30
@@ -459,14 +462,15 @@ rules:
     rationale: "厳密な調査＝問題の可能性"
 
   - pattern: "火種"
-    polarity: -0.30
+    polarity: -0.45
     lang: ja
-    rationale: "将来のリスク要因"
+    rationale: "比喩だが報道用語として確立。明確なネガ"
 
   - pattern: "揺れる"
     polarity: -0.25
     lang: ja
     rationale: "市場・企業の動揺"
+    context_excluded: ["信認", "回復", "和らぐ", "持ち直"]
 
   - pattern: "矛盾"
     polarity: -0.25
@@ -492,3 +496,45 @@ rules:
     polarity: -0.40
     lang: ja
     rationale: "安値更新"
+
+  - pattern: "資金流出"
+    polarity: -0.40
+    lang: ja
+    rationale: "ファンド健全性の核心指標"
+
+  - pattern: "解約急増"
+    polarity: -0.45
+    lang: ja
+    rationale: "フローが反転している決定的証拠"
+
+  - pattern: "規律の緩み"
+    polarity: -0.40
+    lang: ja
+    rationale: "underwriting standards erosion。クレジットサイクル末期"
+
+  - pattern: "融資膨張"
+    polarity: -0.35
+    lang: ja
+    rationale: "レバレッジ過熱の婉曲表現"
+
+  - pattern: "底を打っていない"
+    polarity: -0.40
+    lang: ja
+    rationale: "回復していないことの明示"
+
+  - pattern: "慎重論"
+    polarity: -0.25
+    lang: ja
+    rationale: "投資家センチメント悪化"
+
+  - pattern: "聞き取り"
+    polarity: -0.25
+    lang: ja
+    rationale: "規制当局の調査開始"
+    context_required: ["金融庁", "当局", "自民", "FRB", "SEC", "日銀"]
+
+  - pattern: "脆弱性"
+    polarity: -0.35
+    lang: ja
+    rationale: "FSB等の規制発信"
+    context_required: ["FSB", "金融安定", "金融庁", "当局", "IMF"]
